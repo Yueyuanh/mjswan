@@ -20,5 +20,20 @@
     "spec/training-environment.md"
   ],
   "validation": "440-step local gate launcher trace equals mjlab baseline; offline ONNX compared with four actor sessions; browser build did not pass",
-  "exception": "Source models are simulation candidates; remote backup and formal v0375 evaluation remain pending."
+  "exception": "Source models are simulation candidates; remote backup and formal v0375 evaluation remain pending.",
+  "motion_references": {
+    "Pikachu-V037-Transition-Down.npz": {
+      "path": "src/mjlab/mocap/npz/Pikachu-V037-Transition-Down.npz",
+      "sha256": "ef87cc3215871f9e76ff7896779849336440b6a4fc80b2d46b5da8a159f3919f"
+    },
+    "Pikachu-V037-Transition-Up.npz": {
+      "path": "src/mjlab/mocap/npz/Pikachu-V037-Transition-Up.npz",
+      "sha256": "bbf211658bb408ab1519f6da2de5d89553002094282c1e7cb2efae327e5e2d3c"
+    }
+  },
+  "browser_gate": {
+    "mjswan_base_commit": "7df9fbdd",
+    "validation": "Chrome headless: gated down and up with speed reset, measured biped upright and root height; 59-value reference state unit checks",
+    "limitations": "one fall after longer quadruped hold; not a formal behavioral evaluation; original pilot models remain simulation candidates"
+  }
 }

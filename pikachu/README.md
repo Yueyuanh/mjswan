@@ -2,21 +2,20 @@
 
 ## Status
 
-The mjswan browser app has two independently selectable scenes: biped walking and
-quadruped crawling. The four-policy posture gate is a separate, unfinished integration.
-The policies are simulation candidates; no hardware deployment or full browser
-behavioral evaluation is claimed.
+The mjswan browser app has separate biped walking and quadruped crawling scenes,
+plus a four-policy gated scene that runs in a single browser simulation. The policies
+are simulation candidates; no hardware deployment or full browser behavioral
+evaluation is claimed.
 
 - `browser/main.py`: builds the two independent mjswan browser scenes.
 - `browser/terms.py`: trace-compatible crawl heading observations.
+- `browser/gated.py` and `gate_observation.ts`: gate scene and browser-side reference state.
 - `legacy/run_gate.py`: launches the existing mjlab gate with local model copies.
 - `models/v0375/manifest.json`: source model checksums. ONNX files are local artifacts
   and are excluded from Git.
 - `gate/compose.py`: combines the four actors into a six-input stateless ONNX graph.
 - `gate/wide.py`: provides a single 148-value input for those actors and their gate;
-  browser-side state and reference generation are still required.
-  It does not implement observation generation, posture state, reference selection,
-  or the browser UI.
+  `browser/gate_observation.ts` supplies posture state and reference data at runtime.
 - `gate/provenance.json`: source identities and validation scope.
 - `tests/test_gate_graph.py`: compares the combined ONNX against four separate actors.
 - `doc/`: pre-existing design materials, preserved separately.
@@ -53,6 +52,7 @@ uv pip install --python ../mjlab/.venv/bin/python -e .
 From `mjswan/`, after the setup above:
 
 ```sh
+uv run --project ../mjlab python -m pikachu.gate.wide
 uv run --project ../mjlab python -m pikachu.browser.main --build-only
 uv run --project ../mjlab mjswan serve pikachu/dist --host 127.0.0.1 --port 8080
 ```
@@ -60,8 +60,10 @@ uv run --project ../mjlab mjswan serve pikachu/dist --host 127.0.0.1 --port 8080
 Open `http://127.0.0.1:8080/`. In **Scene**, select **Biped walking** or
 **Quadruped crawling**. Use the three **Twist** controls to set forward, lateral,
 and turning velocity; they start at zero. Reset returns the chosen scene to its
-training task's initial pose. Each scene runs one policy: they do not transition
-between postures.
+initial pose. Select **Gated posture transition** for one robot with all four policies.
+In **Posture**, check **Biped** for standing or uncheck it for crawling. During each
+transition, the velocity sliders are set to zero; set them again after the transition.
+The transition takes about four seconds of simulation time.
 
 To serve to other devices on a trusted local network, run:
 
@@ -75,7 +77,12 @@ relative paths; configure cross-origin isolation if the browser or hosting setup
 requires it. The site runs MuJoCo and ONNX Runtime in the browser. This repository
 does not automatically publish it to a public service.
 
-Both scenes built with mjswan 0.13.1. Observation parity passed over 16 steps per
+All three scenes built with mjswan 0.13.1. The gate packages custom JavaScript and is
+suitable for a trusted static host, not mjswan Cloud. During browser testing one
+static down/up transition completed, and another up transition after a longer crawl
+stance fell; reliable posture switching is not established.
+
+For the independent scenes, observation parity passed over 16 steps per
 scene and headless Chrome loaded each scene and accepted a 0.1 m/s forward command
 without a browser error. This verifies loading and controls, not gait quality or
 long-run stability. The crawl checkpoint has the previously recorded backward-motion
@@ -115,23 +122,27 @@ by Git. The test compares its output against independent ONNX Runtime actor sess
 The graph requires correctly constructed actor observations and state on every step;
 it is not a self-contained controller.
 
-## Four-policy gate status
+## Gate validation and known limitations
 
-A browser build was attempted with the combined graph and the actual V0375 scene. It
-failed before a valid document was produced. The first attempt could not trace
-`JointPosRelToDefault`; a trace-friendly diagnostic replacement passed that point but
-then `crawl` observation tracing failed with `DivergentGraph` (`base_lin_vel`, graph
-`nan`, body `0`). The builder also skipped `HeadingHoldVelocityCommandCfg`,
-`HoldMotionCommandCfg`, and `PostureCommandCfg`, and warned that the previous-action
-observation would be frozen. The gate additionally needs phase, direction, both motion
-clips, and reference re-anchoring wired to browser state. Ignoring these warnings would
-produce a controller with the wrong inputs.
+The gate scene traces the physical observation terms, uses the composed single-input
+ONNX, and keeps posture, frame selection and reference re-anchoring in the browser.
+It uses the V037 down/up pilot models on a V0375 robot. Browser MuJoCo and mjlab's
+training physics differ, and the original models are simulation candidates.
 
-Consequently the two-scene app above cannot switch postures. Finish
-and independently validate those observation and command mappings, build a real mjswan
-document, and run numeric and browser closed-loop parity before publishing it. The
-original V0375 candidate and mjlab gate limitations remain applicable.
+Checks for the local build:
 
+```sh
+node pikachu/tests/test_gate_reference.mjs
+uv run --project ../mjlab pytest pikachu/tests/test_gate_graph.py pikachu/tests/test_browser_terms.py -q
+uv run --project ../mjlab mjswan serve pikachu/dist --host 127.0.0.1 --port 8765 --no-open
+# In a second terminal, using a local Chrome:
+node pikachu/tests/test_browser_gate.mjs
+```
+
+These checks do not prove robust walking-to-standing transitions. A longer static
+crawl hold produced a fall after the up request in one browser run, while another
+short-hold round trip succeeded. The gate has no automatic fall recovery; the
+operator can use Reset. Re-test on the target browser and hardware before sharing.
 
 ## Task record
 
@@ -139,3 +150,5 @@ original V0375 candidate and mjlab gate limitations remain applicable.
 - mjswan base_commit: `86974d21`.
 - spec_read: `spec/agent-defaults.md`, `spec/git-management.md`.
 - No training or formal behavior evaluation was performed; parity and browser startup checks are the available evidence.
+
+- Gate task base: mjlab `1e6a0ae4adcdb437c33eb071afa40ee5dd27242f`, mjswan `7df9fbdd`; spec_read: `spec/agent-defaults.md`, `spec/git-management.md`. Browser integration is not a formal evaluation.

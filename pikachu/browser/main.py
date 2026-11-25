@@ -62,6 +62,9 @@ def build():
             encoder_bias=[0.0] * len(specs[name].joint_names),
             initial_qpos=initial_qpos(cfg, specs[name]),
         )
+    from pikachu.browser.gated import add_gate
+
+    add_gate(project)
     return builder.build(output_dir=HERE / "dist")
 
 
