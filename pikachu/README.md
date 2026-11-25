@@ -57,12 +57,13 @@ uv run --project ../mjlab python -m pikachu.browser.main --build-only
 uv run --project ../mjlab mjswan serve pikachu/dist --host 127.0.0.1 --port 8080
 ```
 
-Open `http://127.0.0.1:8080/`. In **Scene**, select **Biped walking** or
-**Quadruped crawling**. Use the three **Twist** controls to set forward, lateral,
+Open `http://127.0.0.1:8080/`. The default scene is **Gated posture transition**;
+use **Scene** to select **Biped walking** or **Quadruped crawling** instead.
+Use the three **Twist** controls to set forward, lateral,
 and turning velocity; they start at zero. Reset returns the chosen scene to its
-initial pose. Select **Gated posture transition** for one robot with all four policies.
-In **Posture**, check **Biped** for standing or uncheck it for crawling. During each
-transition, the velocity sliders are set to zero; set them again after the transition.
+initial pose. In the gated scene, use **切换四足** or **切换双足** in **Posture**.
+The button shows simulation progress and is disabled until the transition finishes.
+During each transition, the velocity sliders are set to zero; set them again afterward.
 The transition takes about four seconds of simulation time.
 
 To serve to other devices on a trusted local network, run:

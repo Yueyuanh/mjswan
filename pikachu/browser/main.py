@@ -29,9 +29,12 @@ def initial_qpos(cfg, spec):
 
 
 def build():
-    builder = mjswan.Builder()
+    builder = mjswan.Builder(base_path="./")
     project = builder.add_project(name="Pikachu V0375")
     specs = build_controller_specs(version="v0375")
+    from pikachu.browser.gated import add_gate
+
+    add_gate(project)
     for name, label in (("biped", "Biped walking"), ("crawl", "Quadruped crawling")):
         cfg = env_cfg_for(name, version="v0375")
         cfg.events = {}
@@ -62,9 +65,6 @@ def build():
             encoder_bias=[0.0] * len(specs[name].joint_names),
             initial_qpos=initial_qpos(cfg, specs[name]),
         )
-    from pikachu.browser.gated import add_gate
-
-    add_gate(project)
     return builder.build(output_dir=HERE / "dist")
 
 

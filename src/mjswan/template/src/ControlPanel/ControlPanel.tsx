@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActionIcon,
   Anchor,
@@ -260,6 +260,60 @@ function CheckboxControl({
         disabled={disabled}
       />
     </LabeledInput>
+  );
+}
+
+function GatePostureButton({ command, value, onChange, disabled }: {
+  command: CommandDescriptor;
+  value: number;
+  onChange: (id: string, value: number) => void;
+  disabled?: boolean;
+}) {
+  const [status, setStatus] = useState({ target: 1, phase: 1 });
+  const [pending, setPending] = useState(false);
+  const expected = useRef<number | null>(null);
+  useEffect(() => {
+    const update = (event: Event) => {
+      const { target, phase } = (event as CustomEvent<{ target: number; phase: number }>).detail;
+      if (expected.current !== null && target !== expected.current) return;
+      setStatus({ target, phase });
+      if (Math.abs(target - phase) < 1e-6) {
+        expected.current = null;
+        setPending(false);
+      }
+    };
+    const reset = () => {
+      expected.current = null;
+      setPending(false);
+      setStatus({ target: 1, phase: 1 });
+    };
+    window.addEventListener('pikachu-gate-progress', update);
+    window.addEventListener('pikachu-gate-reset', reset);
+    return () => {
+      window.removeEventListener('pikachu-gate-progress', update);
+      window.removeEventListener('pikachu-gate-reset', reset);
+    };
+  }, []);
+  const moving = pending || Math.abs(status.target - status.phase) >= 1e-6;
+  const progress = status.target === 0 ? 1 - status.phase : status.phase;
+  const label = (moving ? status.target : value) >= 0.5 ? '切换四足' : '切换双足';
+  const transitionLabel = status.target === 0 ? '切换四足' : '切换双足';
+  return (
+    <Box px="xs" pb="0.5em">
+      <Button fullWidth size="sm" disabled={disabled || moving}
+        aria-label={moving ? transitionLabel : label}
+        style={{ position: 'relative', overflow: 'hidden', background: '#285377', color: 'white', opacity: 1 }}
+        onClick={() => {
+          const target = value >= 0.5 ? 0 : 1;
+          expected.current = target;
+          setStatus({ target, phase: value >= 0.5 ? 1 : 0 });
+          setPending(true);
+          onChange(command.id, target);
+        }}>
+        {moving && <span aria-hidden="true" style={{ position: 'absolute', inset: 0, width: `${progress * 100}%`, background: '#4d9ee4', transition: 'width 80ms linear' }} />}
+        <span style={{ position: 'relative' }}>{moving ? `${transitionLabel} ${Math.round(progress * 100)}%` : label}</span>
+      </Button>
+    </Box>
   );
 }
 
@@ -746,6 +800,11 @@ function ControlPanel(props: ControlPanelProps) {
                   >
                     {groupCommands.map((command) => {
                       if (command.type === 'checkbox') {
+                        if (command.id === 'posture:biped' && command.label === 'Biped (off: crawl)') {
+                          return <GatePostureButton key={command.id} command={command}
+                            value={commandValues[command.id] ?? 1} onChange={onCommandChange}
+                            disabled={!commandsEnabled} />;
+                        }
                         return (
                           <CheckboxControl
                             key={command.id}
