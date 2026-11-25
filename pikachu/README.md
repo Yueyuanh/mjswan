@@ -11,6 +11,8 @@ candidates. No hardware deployment or complete V0375 evaluation is claimed.
 - `models/v0375/manifest.json`: source model checksums. ONNX files are local artifacts
   and are excluded from Git.
 - `gate/compose.py`: combines the four actors into a six-input stateless ONNX graph.
+- `gate/wide.py`: provides a single 148-value input for those actors and their gate;
+  browser-side state and reference generation are still required.
   It does not implement observation generation, posture state, reference selection,
   or the browser UI.
 - `gate/provenance.json`: source identities and validation scope.
@@ -66,6 +68,7 @@ behavioral equivalence evaluation.
 
 ```sh
 uv run --project ../mjlab python -m pikachu.gate.compose
+uv run --project ../mjlab python -m pikachu.gate.wide
 uv run --project ../mjlab pytest pikachu/tests/test_gate_graph.py -q
 ```
 
