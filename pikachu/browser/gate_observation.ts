@@ -3,6 +3,18 @@ import { quatApply, quatApplyInv, quatInverse, quatMultiply, quatToRot6d, yawQua
 
 type Clip = { joint_pos: number[][]; joint_vel: number[][]; anchor_pos: number[][]; anchor_quat: number[][] };
 
+/** Restrict the command reaching the crawl policy even when set outside the UI. */
+export class GateTwist extends ObservationBase {
+  get size(): number { return 3; }
+  compute(): Float32Array {
+    const manager = this.runner.getContext()?.commandManager;
+    if (!manager) throw new Error('Gate needs a command manager');
+    const twist = manager.getCommand('twist');
+    const crawl = manager.getCommand('posture')[0] < 0.5;
+    return Float32Array.from(twist, value => crawl ? Math.max(-0.3, Math.min(0.3, value)) : value);
+  }
+}
+
 /** Holds posture and reference state inside one browser simulation. */
 export class GateReference extends ObservationBase {
   private target = 1;

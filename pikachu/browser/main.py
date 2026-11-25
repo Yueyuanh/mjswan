@@ -45,6 +45,7 @@ def build():
         scene = project.add_scene_mjlab(specs[name].task_id, name=label, env_cfg=cfg)
         cmd = cfg.commands["twist"]
         ranges = cmd.ranges
+        crawl_limit = (-0.3, 0.3)
         scene.add_policy(
             name=label,
             policy=onnx.load(HERE / "models" / "v0375" / f"{name}.onnx"),
@@ -52,9 +53,9 @@ def build():
             actions=cfg.actions,
             commands={
                 "twist": mjswan.velocity_command(
-                    lin_vel_x=ranges.lin_vel_x,
-                    lin_vel_y=ranges.lin_vel_y,
-                    ang_vel_z=ranges.ang_vel_z,
+                    lin_vel_x=crawl_limit if name == "crawl" else ranges.lin_vel_x,
+                    lin_vel_y=crawl_limit if name == "crawl" else ranges.lin_vel_y,
+                    ang_vel_z=crawl_limit if name == "crawl" else ranges.ang_vel_z,
                     default_lin_vel_x=0.0,
                 )
             },

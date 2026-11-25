@@ -15,6 +15,12 @@ const ctx = { mjData: {time: 0}, commandManager: {
   setValue: (name, value) => { twist[['twist:lin_vel_x', 'twist:lin_vel_y', 'twist:ang_vel_z'].indexOf(name)] = value; },
 } };
 const runner = { getContext: () => ctx };
+const gateTwist = new observations.GateTwist(runner, {name: 'GateTwist'});
+twist.splice(0, 3, .8, -.7, .6);
+assert.deepEqual(Array.from(gateTwist.compute()), [.8, -.7, .6].map(Math.fround));
+requested = 0;
+assert.deepEqual(Array.from(gateTwist.compute()), [.3, -.3, .3].map(Math.fround));
+requested = 1; twist.splice(0, 3, .1, .2, .3);
 const gate = new observations.GateReference(runner, {name: 'GateReference', down: frame(0), up: frame(1000)});
 const state = {rootPos: new Float32Array([3, 4, .2]), rootQuat: new Float32Array([1, 0, 0, 0])};
 let obs = gate.compute(state);

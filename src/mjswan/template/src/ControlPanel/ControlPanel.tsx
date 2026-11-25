@@ -184,12 +184,14 @@ function SliderControl({
   onChange,
   disabled,
   enabledWhenValue,
+  limit,
 }: {
   command: CommandDescriptor;
   value: number;
   onChange: (id: string, value: number) => void;
   disabled?: boolean;
   enabledWhenValue?: number;
+  limit?: number;
 }) {
   const dependencyDisabled = command.enabledWhen !== undefined && (enabledWhenValue ?? 0) < 0.5;
   const isDisabled = disabled || dependencyDisabled;
@@ -200,16 +202,15 @@ function SliderControl({
   const range = command.adjustableRange;
   const [reach, setReach] = useState(range?.default ?? 0);
   // `min`/`max` are declared optional because they are slider-only; a slider has them.
-  const min = range ? -reach : (command.min ?? 0);
-  const max = range ? reach : (command.max ?? 1);
+  const min = Math.max(range ? -reach : (command.min ?? 0), limit === undefined ? -Infinity : -limit);
+  const max = Math.min(range ? reach : (command.max ?? 1), limit === undefined ? Infinity : limit);
 
   // Narrowing the reach past the current value would leave the thumb outside the
   // track, so bring the command with it rather than showing a stale position.
   useEffect(() => {
-    if (!range) return;
-    const clamped = Math.max(-reach, Math.min(reach, value));
+    const clamped = Math.max(min, Math.min(max, value));
     if (clamped !== value) onChange(command.id, clamped);
-  }, [range, reach, value, command.id, onChange]);
+  }, [min, max, value, command.id, onChange]);
 
   return (
     <>
@@ -219,7 +220,7 @@ function SliderControl({
           label={range.label ?? `Max ${command.label}`}
           value={reach}
           min={range.min}
-          max={range.max}
+          max={limit === undefined ? range.max : Math.min(range.max, limit)}
           step={range.step}
           onChange={setReach}
           disabled={isDisabled}
@@ -842,6 +843,7 @@ function ControlPanel(props: ControlPanelProps) {
                           value={commandValues[command.id] ?? 0}
                           onChange={onCommandChange}
                           disabled={!commandsEnabled}
+                          limit={command.group === 'twist' && commands.some(c => c.id === 'posture:biped' && c.label === 'Biped (off: crawl)') && (commandValues['posture:biped'] ?? 1) < 0.5 ? 0.3 : undefined}
                           enabledWhenValue={
                             command.enabledWhen
                               ? commandValues[`${command.group}:${command.enabledWhen}`]

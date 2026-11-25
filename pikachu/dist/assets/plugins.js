@@ -108,6 +108,18 @@ function quatToRot6d(quat) {
 }
 
 // ../../../pikachu/browser/gate_observation.ts
+var GateTwist = class extends ObservationBase {
+  get size() {
+    return 3;
+  }
+  compute() {
+    const manager = this.runner.getContext()?.commandManager;
+    if (!manager) throw new Error("Gate needs a command manager");
+    const twist = manager.getCommand("twist");
+    const crawl = manager.getCommand("posture")[0] < 0.5;
+    return Float32Array.from(twist, (value) => crawl ? Math.max(-0.3, Math.min(0.3, value)) : value);
+  }
+};
 var GateReference = class extends ObservationBase {
   target = 1;
   phase = 1;
@@ -195,7 +207,7 @@ var GateReference = class extends ObservationBase {
 };
 
 // src/.plugins-entry.ts
-var observations = { GateReference };
+var observations = { GateReference, GateTwist };
 export {
   observations
 };

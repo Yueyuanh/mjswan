@@ -64,6 +64,10 @@ and turning velocity; they start at zero. Reset returns the chosen scene to its
 initial pose. In the gated scene, use **切换四足** or **切换双足** in **Posture**.
 The button shows simulation progress and is disabled until the transition finishes.
 During each transition, the velocity sliders are set to zero; set them again afterward.
+In quadruped crawling and the gated crawl mode, forward and lateral velocity commands
+are limited to ±0.3 m/s and yaw commands to ±0.3 rad/s. The biped range is unchanged.
+The restriction follows a reported limb interference issue at higher crawl speeds;
+it is not evidence that interference is eliminated within the restricted range.
 The transition takes about four seconds of simulation time.
 
 To serve to other devices on a trusted local network, run:

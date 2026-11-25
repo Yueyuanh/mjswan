@@ -42,6 +42,10 @@ def add_gate(project):
         ts_name="GateReference", ts_src=str(HERE / "browser/gate_observation.ts")
     )
     mjswan.register_observation("GateReference", binding)
+    twist_binding = mjswan.ObservationBinding(
+        ts_name="GateTwist", ts_src=str(HERE / "browser/gate_observation.ts")
+    )
+    mjswan.register_observation("GateTwist", twist_binding)
     terms = {
         "sensor_linear": biped["base_lin_vel"],
         "sensor_angular": biped["base_ang_vel"],
@@ -51,7 +55,7 @@ def add_gate(project):
         "joint_pos": mjswan.ObservationTermCfg(func=absolute_joint_pos),
         "joint_vel": biped["joint_vel"],
         "last_action": mjswan.ObservationTermCfg(func=mdp.last_action),
-        "twist": biped["command"],
+        "twist": mjswan.ObservationTermCfg(func=twist_binding),
         "crawl_phase": crawl["crawl_phase"],
         "gate_reference": mjswan.ObservationTermCfg(
             func=binding,
