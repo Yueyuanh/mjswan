@@ -128,6 +128,9 @@ var GateReference = class extends ObservationBase {
     this.first = true;
     this.lastTime = -1;
     this.cached = new Float32Array(59);
+    if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+      window.dispatchEvent(new Event("pikachu-gate-reset"));
+    }
   }
   compute(state) {
     const context = this.runner.getContext();
@@ -139,6 +142,11 @@ var GateReference = class extends ObservationBase {
     this.target = requested && requested[0] >= 0.5 ? 1 : 0;
     const change = Math.max(-5e-3, Math.min(5e-3, this.target - this.phase));
     this.phase = Math.max(0, Math.min(1, this.phase + change));
+    if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+      window.dispatchEvent(new CustomEvent("pikachu-gate-progress", {
+        detail: { target: this.target, phase: this.phase }
+      }));
+    }
     const dir = Math.abs(this.target - this.phase) > 0.02 ? this.target > this.phase ? 1 : -1 : 0;
     if (dir !== 0 && context.commandManager) {
       const twist = context.commandManager.getCommand("twist");

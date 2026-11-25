@@ -60,833 +60,6 @@
       "name": "Pikachu V0375",
       "scenes": [
         {
-          "id": "biped_walking",
-          "name": "Biped walking",
-          "scene": "scene.mjz",
-          "control_dt": 0.02,
-          "camera": {
-            "lookat": [
-              0.0,
-              0.0,
-              0.0
-            ],
-            "distance": 3.0,
-            "elevation": -5.0,
-            "azimuth": 90.0,
-            "origin_type": "ASSET_BODY",
-            "height": 240,
-            "width": 320,
-            "fovy": 45.0,
-            "entity_name": "robot",
-            "body_name": "base_link"
-          },
-          "graphics": {
-            "color_management": "classic",
-            "tone_mapping": "pbr_neutral",
-            "exposure": 0.0,
-            "output_color_space": "srgb",
-            "base_color_type": "srgb",
-            "enable_shadows": true,
-            "enable_reflections": true,
-            "enable_haze": true
-          },
-          "mdps": [
-            {
-              "id": "biped_walking",
-              "commands": {
-                "twist": {
-                  "name": "UiCommand",
-                  "ui": {
-                    "inputs": [
-                      {
-                        "type": "slider",
-                        "name": "lin_vel_x",
-                        "label": "Forward Velocity",
-                        "min": -0.6,
-                        "max": 0.8,
-                        "step": 0.05,
-                        "default": 0.0
-                      },
-                      {
-                        "type": "slider",
-                        "name": "lin_vel_y",
-                        "label": "Lateral Velocity",
-                        "min": -0.5,
-                        "max": 0.5,
-                        "step": 0.05,
-                        "default": 0.0
-                      },
-                      {
-                        "type": "slider",
-                        "name": "ang_vel_z",
-                        "label": "Yaw Rate",
-                        "min": -0.5,
-                        "max": 0.5,
-                        "step": 0.05,
-                        "default": 0.0
-                      }
-                    ]
-                  }
-                }
-              },
-              "actions": {
-                "joint_pos": {
-                  "type": "joint_position",
-                  "scale": {
-                    "robot/left_hip_pitch_joint": 0.5,
-                    "robot/right_hip_pitch_joint": 0.5,
-                    "robot/left_knee_joint": 0.5,
-                    "robot/right_knee_joint": 0.5,
-                    "robot/left_hip_roll_joint": 0.2,
-                    "robot/right_hip_roll_joint": 0.2,
-                    "robot/left_hip_yaw_joint": 0.2,
-                    "robot/right_hip_yaw_joint": 0.2,
-                    "robot/left_ankle_joint": 0.35,
-                    "robot/right_ankle_joint": 0.35,
-                    "robot/left_arm_pitch_joint": 0.35,
-                    "robot/right_arm_pitch_joint": 0.35,
-                    "robot/left_arm_roll_joint": 0.3,
-                    "robot/right_arm_roll_joint": 0.3,
-                    "robot/left_arm_yaw_joint": 0.2,
-                    "robot/right_arm_yaw_joint": 0.2,
-                    "robot/left_elbow_joint": 0.3,
-                    "robot/right_elbow_joint": 0.3,
-                    "robot/head_pitch_joint": 0.25,
-                    "robot/head_roll_joint": 0.25,
-                    "robot/head_yaw_joint": 0.25,
-                    "robot/tail_pitch_joint": 0.25,
-                    "robot/tail_yaw_joint": 0.25
-                  },
-                  "actuator_names": [
-                    "robot/.*"
-                  ],
-                  "use_default_offset": true
-                }
-              },
-              "observations": {
-                "actor": {
-                  "fused": "mdp/biped_walking/obs/actor.onnx",
-                  "input_slots": [
-                    {
-                      "action": "action",
-                      "input": "action__action",
-                      "shape": [
-                        1,
-                        23
-                      ]
-                    },
-                    {
-                      "command": "twist",
-                      "field": "command",
-                      "input": "command__twist_command",
-                      "shape": [
-                        1,
-                        3
-                      ]
-                    },
-                    {
-                      "sensor": "robot/imu_ang_vel",
-                      "input": "sensor__robot_imu_ang_vel",
-                      "shape": [
-                        1,
-                        3
-                      ]
-                    },
-                    {
-                      "sensor": "robot/imu_lin_vel",
-                      "input": "sensor__robot_imu_lin_vel",
-                      "shape": [
-                        1,
-                        3
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "joint_pos_biased",
-                      "input": "robot__joint_pos_biased",
-                      "shape": [
-                        1,
-                        23
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "joint_vel",
-                      "input": "robot__joint_vel",
-                      "shape": [
-                        1,
-                        23
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "projected_gravity_b",
-                      "input": "robot__projected_gravity_b",
-                      "shape": [
-                        1,
-                        3
-                      ]
-                    }
-                  ],
-                  "layout": [
-                    {
-                      "name": "base_lin_vel",
-                      "size": 3,
-                      "func": "mjlab.envs.mdp.observations:builtin_sensor",
-                      "doc": "Get observation from a built-in sensor by name.",
-                      "params": {
-                        "sensor_name": "robot/imu_lin_vel"
-                      }
-                    },
-                    {
-                      "name": "base_ang_vel",
-                      "size": 3,
-                      "func": "mjlab.envs.mdp.observations:builtin_sensor",
-                      "doc": "Get observation from a built-in sensor by name.",
-                      "params": {
-                        "sensor_name": "robot/imu_ang_vel"
-                      }
-                    },
-                    {
-                      "name": "projected_gravity",
-                      "size": 3,
-                      "func": "mjlab.envs.mdp.observations:projected_gravity"
-                    },
-                    {
-                      "name": "joint_pos",
-                      "size": 23,
-                      "func": "mjlab.envs.mdp.observations:joint_pos_rel",
-                      "params": {
-                        "biased": true
-                      }
-                    },
-                    {
-                      "name": "joint_vel",
-                      "size": 23,
-                      "func": "mjlab.envs.mdp.observations:joint_vel_rel"
-                    },
-                    {
-                      "name": "actions",
-                      "size": 23,
-                      "func": "mjlab.envs.mdp.observations:last_action"
-                    },
-                    {
-                      "name": "command",
-                      "size": 3,
-                      "func": "mjlab.envs.mdp.observations:generated_commands",
-                      "params": {
-                        "command_name": "twist"
-                      }
-                    }
-                  ],
-                  "size": 81
-                }
-              },
-              "debug_vis": {
-                "meansize": 0.03,
-                "sensors": {
-                  "foot_height_scan": {
-                    "kind": "raycast",
-                    "local_offsets": [
-                      [
-                        0.0,
-                        0.0,
-                        0.0
-                      ],
-                      [
-                        0.029999999329447746,
-                        0.0,
-                        0.0
-                      ],
-                      [
-                        0.014999999664723873,
-                        0.025980761274695396,
-                        0.0
-                      ],
-                      [
-                        -0.014999999664723873,
-                        0.025980761274695396,
-                        0.0
-                      ],
-                      [
-                        -0.029999999329447746,
-                        3.673940475037442e-18,
-                        0.0
-                      ],
-                      [
-                        -0.014999999664723873,
-                        -0.025980761274695396,
-                        0.0
-                      ],
-                      [
-                        0.014999999664723873,
-                        -0.025980761274695396,
-                        0.0
-                      ]
-                    ],
-                    "local_directions": [
-                      [
-                        0.0,
-                        0.0,
-                        -1.0
-                      ],
-                      [
-                        0.0,
-                        0.0,
-                        -1.0
-                      ],
-                      [
-                        0.0,
-                        0.0,
-                        -1.0
-                      ],
-                      [
-                        0.0,
-                        0.0,
-                        -1.0
-                      ],
-                      [
-                        0.0,
-                        0.0,
-                        -1.0
-                      ],
-                      [
-                        0.0,
-                        0.0,
-                        -1.0
-                      ],
-                      [
-                        0.0,
-                        0.0,
-                        -1.0
-                      ]
-                    ],
-                    "frames": [
-                      {
-                        "type": "site",
-                        "name": "robot/left_foot"
-                      },
-                      {
-                        "type": "site",
-                        "name": "robot/right_foot"
-                      }
-                    ],
-                    "ray_alignment": "yaw",
-                    "max_distance": 1.0,
-                    "exclude_parent_body": true,
-                    "include_geom_groups": [
-                      0
-                    ],
-                    "debug_vis": true,
-                    "viz": {
-                      "hit_color": [
-                        1.0,
-                        0.0,
-                        1.0,
-                        0.8
-                      ],
-                      "miss_color": [
-                        1.0,
-                        0.0,
-                        0.0,
-                        0.4
-                      ],
-                      "hit_sphere_color": [
-                        1.0,
-                        0.0,
-                        1.0,
-                        1.0
-                      ],
-                      "hit_sphere_radius": 0.5,
-                      "show_rays": true,
-                      "show_normals": false,
-                      "normal_color": [
-                        1.0,
-                        1.0,
-                        0.0,
-                        1.0
-                      ],
-                      "normal_length": 5.0
-                    }
-                  }
-                },
-                "rewards": {}
-              }
-            }
-          ],
-          "policies": [
-            {
-              "id": "biped_walking",
-              "name": "Biped walking",
-              "mdp": "biped_walking",
-              "onnx": "policy/biped_walking.onnx",
-              "policy_joint_names": [
-                "robot/left_arm_pitch_joint",
-                "robot/left_arm_roll_joint",
-                "robot/left_arm_yaw_joint",
-                "robot/left_elbow_joint",
-                "robot/right_arm_pitch_joint",
-                "robot/right_arm_roll_joint",
-                "robot/right_arm_yaw_joint",
-                "robot/right_elbow_joint",
-                "robot/left_hip_pitch_joint",
-                "robot/left_hip_roll_joint",
-                "robot/left_hip_yaw_joint",
-                "robot/left_knee_joint",
-                "robot/left_ankle_joint",
-                "robot/right_hip_pitch_joint",
-                "robot/right_hip_roll_joint",
-                "robot/right_hip_yaw_joint",
-                "robot/right_knee_joint",
-                "robot/right_ankle_joint",
-                "robot/head_pitch_joint",
-                "robot/head_roll_joint",
-                "robot/head_yaw_joint",
-                "robot/tail_pitch_joint",
-                "robot/tail_yaw_joint"
-              ],
-              "default_joint_pos": [
-                0.0,
-                -0.9250245035569946,
-                0.0,
-                0.0,
-                0.0,
-                0.9250245035569946,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0
-              ],
-              "encoder_bias": [
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0
-              ],
-              "initial_qpos": [
-                0.0,
-                0.0,
-                0.2318575551806145,
-                1.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                -0.9250245035569946,
-                0.0,
-                0.0,
-                0.0,
-                0.9250245035569946,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0
-              ]
-            }
-          ]
-        },
-        {
-          "id": "quadruped_crawling",
-          "name": "Quadruped crawling",
-          "scene": "scene.mjz",
-          "control_dt": 0.02,
-          "camera": {
-            "lookat": [
-              0.0,
-              0.0,
-              0.0
-            ],
-            "distance": 1.2,
-            "elevation": -5.0,
-            "azimuth": 90.0,
-            "origin_type": "ASSET_BODY",
-            "height": 240,
-            "width": 320,
-            "fovy": 45.0,
-            "entity_name": "robot",
-            "body_name": "base_link"
-          },
-          "graphics": {
-            "color_management": "classic",
-            "tone_mapping": "pbr_neutral",
-            "exposure": 0.0,
-            "output_color_space": "srgb",
-            "base_color_type": "srgb",
-            "enable_shadows": true,
-            "enable_reflections": true,
-            "enable_haze": true
-          },
-          "mdps": [
-            {
-              "id": "quadruped_crawling",
-              "commands": {
-                "twist": {
-                  "name": "UiCommand",
-                  "ui": {
-                    "inputs": [
-                      {
-                        "type": "slider",
-                        "name": "lin_vel_x",
-                        "label": "Forward Velocity",
-                        "min": -0.15,
-                        "max": 0.5,
-                        "step": 0.05,
-                        "default": 0.0
-                      },
-                      {
-                        "type": "slider",
-                        "name": "lin_vel_y",
-                        "label": "Lateral Velocity",
-                        "min": -0.08,
-                        "max": 0.08,
-                        "step": 0.05,
-                        "default": 0.0
-                      },
-                      {
-                        "type": "slider",
-                        "name": "ang_vel_z",
-                        "label": "Yaw Rate",
-                        "min": -0.2,
-                        "max": 0.2,
-                        "step": 0.05,
-                        "default": 0.0
-                      }
-                    ]
-                  }
-                }
-              },
-              "actions": {
-                "joint_pos": {
-                  "type": "joint_position",
-                  "scale": {
-                    "robot/left_hip_pitch_joint": 0.35,
-                    "robot/right_hip_pitch_joint": 0.35,
-                    "robot/left_hip_roll_joint": 0.15,
-                    "robot/right_hip_roll_joint": 0.15,
-                    "robot/left_hip_yaw_joint": 0.15,
-                    "robot/right_hip_yaw_joint": 0.15,
-                    "robot/left_knee_joint": 0.3,
-                    "robot/right_knee_joint": 0.3,
-                    "robot/left_ankle_joint": 0.25,
-                    "robot/right_ankle_joint": 0.25,
-                    "robot/left_arm_pitch_joint": 0.25,
-                    "robot/right_arm_pitch_joint": 0.25,
-                    "robot/left_arm_roll_joint": 0.25,
-                    "robot/right_arm_roll_joint": 0.25,
-                    "robot/left_arm_yaw_joint": 0.2,
-                    "robot/right_arm_yaw_joint": 0.2,
-                    "robot/left_elbow_joint": 0.5,
-                    "robot/right_elbow_joint": 0.5,
-                    "robot/head_pitch_joint": 0.25,
-                    "robot/head_roll_joint": 0.25,
-                    "robot/head_yaw_joint": 0.25,
-                    "robot/tail_pitch_joint": 0.25,
-                    "robot/tail_yaw_joint": 0.25
-                  },
-                  "actuator_names": [
-                    "robot/.*"
-                  ],
-                  "use_default_offset": true
-                }
-              },
-              "observations": {
-                "actor": {
-                  "fused": "mdp/quadruped_crawling/obs/actor.onnx",
-                  "input_slots": [
-                    {
-                      "action": "action",
-                      "input": "action__action",
-                      "shape": [
-                        1,
-                        23
-                      ]
-                    },
-                    {
-                      "command": "twist",
-                      "field": "command",
-                      "input": "command__twist_command",
-                      "shape": [
-                        1,
-                        3
-                      ]
-                    },
-                    {
-                      "env": "episode_length_buf",
-                      "input": "env__episode_length_buf",
-                      "shape": [
-                        1
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "joint_pos_biased",
-                      "input": "robot__joint_pos_biased",
-                      "shape": [
-                        1,
-                        23
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "joint_vel",
-                      "input": "robot__joint_vel",
-                      "shape": [
-                        1,
-                        23
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "projected_gravity_b",
-                      "input": "robot__projected_gravity_b",
-                      "shape": [
-                        1,
-                        3
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "root_link_ang_vel_w",
-                      "input": "robot__root_link_ang_vel_w",
-                      "shape": [
-                        1,
-                        3
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "root_link_lin_vel_w",
-                      "input": "robot__root_link_lin_vel_w",
-                      "shape": [
-                        1,
-                        3
-                      ]
-                    },
-                    {
-                      "entity": "robot",
-                      "field": "root_link_quat_w",
-                      "input": "robot__root_link_quat_w",
-                      "shape": [
-                        1,
-                        4
-                      ]
-                    }
-                  ],
-                  "layout": [
-                    {
-                      "name": "base_lin_vel",
-                      "size": 3,
-                      "func": "pikachu.browser.terms:heading_lin_vel"
-                    },
-                    {
-                      "name": "base_ang_vel",
-                      "size": 3,
-                      "func": "pikachu.browser.terms:heading_ang_vel"
-                    },
-                    {
-                      "name": "projected_gravity",
-                      "size": 3,
-                      "func": "mjlab.envs.mdp.observations:projected_gravity"
-                    },
-                    {
-                      "name": "joint_pos",
-                      "size": 23,
-                      "func": "mjlab.envs.mdp.observations:joint_pos_rel",
-                      "params": {
-                        "biased": true
-                      }
-                    },
-                    {
-                      "name": "joint_vel",
-                      "size": 23,
-                      "func": "mjlab.envs.mdp.observations:joint_vel_rel"
-                    },
-                    {
-                      "name": "actions",
-                      "size": 23,
-                      "func": "mjlab.envs.mdp.observations:last_action"
-                    },
-                    {
-                      "name": "command",
-                      "size": 3,
-                      "func": "mjlab.envs.mdp.observations:generated_commands",
-                      "params": {
-                        "command_name": "twist"
-                      }
-                    },
-                    {
-                      "name": "crawl_phase",
-                      "size": 2,
-                      "func": "mjlab.tasks.velocity.config.pikachu_v035_crawl.mdp:phase_observation"
-                    }
-                  ],
-                  "size": 83
-                }
-              }
-            }
-          ],
-          "policies": [
-            {
-              "id": "quadruped_crawling",
-              "name": "Quadruped crawling",
-              "mdp": "quadruped_crawling",
-              "onnx": "policy/quadruped_crawling.onnx",
-              "policy_joint_names": [
-                "robot/left_arm_pitch_joint",
-                "robot/left_arm_roll_joint",
-                "robot/left_arm_yaw_joint",
-                "robot/left_elbow_joint",
-                "robot/right_arm_pitch_joint",
-                "robot/right_arm_roll_joint",
-                "robot/right_arm_yaw_joint",
-                "robot/right_elbow_joint",
-                "robot/left_hip_pitch_joint",
-                "robot/left_hip_roll_joint",
-                "robot/left_hip_yaw_joint",
-                "robot/left_knee_joint",
-                "robot/left_ankle_joint",
-                "robot/right_hip_pitch_joint",
-                "robot/right_hip_roll_joint",
-                "robot/right_hip_yaw_joint",
-                "robot/right_knee_joint",
-                "robot/right_ankle_joint",
-                "robot/head_pitch_joint",
-                "robot/head_roll_joint",
-                "robot/head_yaw_joint",
-                "robot/tail_pitch_joint",
-                "robot/tail_yaw_joint"
-              ],
-              "default_joint_pos": [
-                1.9616910080494938,
-                -1.4835298641951802,
-                1.5707963267948966,
-                0.0,
-                -1.9616910080494938,
-                1.4835298641951802,
-                -1.5707963267948966,
-                0.0,
-                1.327922,
-                -0.018688,
-                -0.066052,
-                0.278583,
-                -0.34906585039886584,
-                -1.327922,
-                0.018688,
-                0.066052,
-                -0.278583,
-                0.34906585039886584,
-                -0.7853981633974483,
-                0.0,
-                0.0,
-                -2.007128639793479,
-                0.0
-              ],
-              "encoder_bias": [
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0
-              ],
-              "initial_qpos": [
-                0.0,
-                0.0,
-                0.22213926560553537,
-                0.7648421872844885,
-                0.0,
-                0.644217687237691,
-                0.0,
-                1.9616910080494938,
-                -1.4835298641951802,
-                1.5707963267948966,
-                0.0,
-                -1.9616910080494938,
-                1.4835298641951802,
-                -1.5707963267948966,
-                0.0,
-                1.327922,
-                -0.018688,
-                -0.066052,
-                0.278583,
-                -0.34906585039886584,
-                -1.327922,
-                0.018688,
-                0.066052,
-                -0.278583,
-                0.34906585039886584,
-                -0.7853981633974483,
-                0.0,
-                0.0,
-                -2.007128639793479,
-                0.0
-              ]
-            }
-          ]
-        },
-        {
           "id": "gated_posture_transition",
           "name": "Gated posture transition",
           "scene": "scene.mjz",
@@ -25743,6 +24916,833 @@
                 0.0,
                 0.0,
                 0.0,
+                0.0
+              ]
+            }
+          ]
+        },
+        {
+          "id": "biped_walking",
+          "name": "Biped walking",
+          "scene": "scene.mjz",
+          "control_dt": 0.02,
+          "camera": {
+            "lookat": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "distance": 3.0,
+            "elevation": -5.0,
+            "azimuth": 90.0,
+            "origin_type": "ASSET_BODY",
+            "height": 240,
+            "width": 320,
+            "fovy": 45.0,
+            "entity_name": "robot",
+            "body_name": "base_link"
+          },
+          "graphics": {
+            "color_management": "classic",
+            "tone_mapping": "pbr_neutral",
+            "exposure": 0.0,
+            "output_color_space": "srgb",
+            "base_color_type": "srgb",
+            "enable_shadows": true,
+            "enable_reflections": true,
+            "enable_haze": true
+          },
+          "mdps": [
+            {
+              "id": "biped_walking",
+              "commands": {
+                "twist": {
+                  "name": "UiCommand",
+                  "ui": {
+                    "inputs": [
+                      {
+                        "type": "slider",
+                        "name": "lin_vel_x",
+                        "label": "Forward Velocity",
+                        "min": -0.6,
+                        "max": 0.8,
+                        "step": 0.05,
+                        "default": 0.0
+                      },
+                      {
+                        "type": "slider",
+                        "name": "lin_vel_y",
+                        "label": "Lateral Velocity",
+                        "min": -0.5,
+                        "max": 0.5,
+                        "step": 0.05,
+                        "default": 0.0
+                      },
+                      {
+                        "type": "slider",
+                        "name": "ang_vel_z",
+                        "label": "Yaw Rate",
+                        "min": -0.5,
+                        "max": 0.5,
+                        "step": 0.05,
+                        "default": 0.0
+                      }
+                    ]
+                  }
+                }
+              },
+              "actions": {
+                "joint_pos": {
+                  "type": "joint_position",
+                  "scale": {
+                    "robot/left_hip_pitch_joint": 0.5,
+                    "robot/right_hip_pitch_joint": 0.5,
+                    "robot/left_knee_joint": 0.5,
+                    "robot/right_knee_joint": 0.5,
+                    "robot/left_hip_roll_joint": 0.2,
+                    "robot/right_hip_roll_joint": 0.2,
+                    "robot/left_hip_yaw_joint": 0.2,
+                    "robot/right_hip_yaw_joint": 0.2,
+                    "robot/left_ankle_joint": 0.35,
+                    "robot/right_ankle_joint": 0.35,
+                    "robot/left_arm_pitch_joint": 0.35,
+                    "robot/right_arm_pitch_joint": 0.35,
+                    "robot/left_arm_roll_joint": 0.3,
+                    "robot/right_arm_roll_joint": 0.3,
+                    "robot/left_arm_yaw_joint": 0.2,
+                    "robot/right_arm_yaw_joint": 0.2,
+                    "robot/left_elbow_joint": 0.3,
+                    "robot/right_elbow_joint": 0.3,
+                    "robot/head_pitch_joint": 0.25,
+                    "robot/head_roll_joint": 0.25,
+                    "robot/head_yaw_joint": 0.25,
+                    "robot/tail_pitch_joint": 0.25,
+                    "robot/tail_yaw_joint": 0.25
+                  },
+                  "actuator_names": [
+                    "robot/.*"
+                  ],
+                  "use_default_offset": true
+                }
+              },
+              "observations": {
+                "actor": {
+                  "fused": "mdp/biped_walking/obs/actor.onnx",
+                  "input_slots": [
+                    {
+                      "action": "action",
+                      "input": "action__action",
+                      "shape": [
+                        1,
+                        23
+                      ]
+                    },
+                    {
+                      "command": "twist",
+                      "field": "command",
+                      "input": "command__twist_command",
+                      "shape": [
+                        1,
+                        3
+                      ]
+                    },
+                    {
+                      "sensor": "robot/imu_ang_vel",
+                      "input": "sensor__robot_imu_ang_vel",
+                      "shape": [
+                        1,
+                        3
+                      ]
+                    },
+                    {
+                      "sensor": "robot/imu_lin_vel",
+                      "input": "sensor__robot_imu_lin_vel",
+                      "shape": [
+                        1,
+                        3
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "joint_pos_biased",
+                      "input": "robot__joint_pos_biased",
+                      "shape": [
+                        1,
+                        23
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "joint_vel",
+                      "input": "robot__joint_vel",
+                      "shape": [
+                        1,
+                        23
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "projected_gravity_b",
+                      "input": "robot__projected_gravity_b",
+                      "shape": [
+                        1,
+                        3
+                      ]
+                    }
+                  ],
+                  "layout": [
+                    {
+                      "name": "base_lin_vel",
+                      "size": 3,
+                      "func": "mjlab.envs.mdp.observations:builtin_sensor",
+                      "doc": "Get observation from a built-in sensor by name.",
+                      "params": {
+                        "sensor_name": "robot/imu_lin_vel"
+                      }
+                    },
+                    {
+                      "name": "base_ang_vel",
+                      "size": 3,
+                      "func": "mjlab.envs.mdp.observations:builtin_sensor",
+                      "doc": "Get observation from a built-in sensor by name.",
+                      "params": {
+                        "sensor_name": "robot/imu_ang_vel"
+                      }
+                    },
+                    {
+                      "name": "projected_gravity",
+                      "size": 3,
+                      "func": "mjlab.envs.mdp.observations:projected_gravity"
+                    },
+                    {
+                      "name": "joint_pos",
+                      "size": 23,
+                      "func": "mjlab.envs.mdp.observations:joint_pos_rel",
+                      "params": {
+                        "biased": true
+                      }
+                    },
+                    {
+                      "name": "joint_vel",
+                      "size": 23,
+                      "func": "mjlab.envs.mdp.observations:joint_vel_rel"
+                    },
+                    {
+                      "name": "actions",
+                      "size": 23,
+                      "func": "mjlab.envs.mdp.observations:last_action"
+                    },
+                    {
+                      "name": "command",
+                      "size": 3,
+                      "func": "mjlab.envs.mdp.observations:generated_commands",
+                      "params": {
+                        "command_name": "twist"
+                      }
+                    }
+                  ],
+                  "size": 81
+                }
+              },
+              "debug_vis": {
+                "meansize": 0.03,
+                "sensors": {
+                  "foot_height_scan": {
+                    "kind": "raycast",
+                    "local_offsets": [
+                      [
+                        0.0,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.029999999329447746,
+                        0.0,
+                        0.0
+                      ],
+                      [
+                        0.014999999664723873,
+                        0.025980761274695396,
+                        0.0
+                      ],
+                      [
+                        -0.014999999664723873,
+                        0.025980761274695396,
+                        0.0
+                      ],
+                      [
+                        -0.029999999329447746,
+                        3.673940475037442e-18,
+                        0.0
+                      ],
+                      [
+                        -0.014999999664723873,
+                        -0.025980761274695396,
+                        0.0
+                      ],
+                      [
+                        0.014999999664723873,
+                        -0.025980761274695396,
+                        0.0
+                      ]
+                    ],
+                    "local_directions": [
+                      [
+                        0.0,
+                        0.0,
+                        -1.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        -1.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        -1.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        -1.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        -1.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        -1.0
+                      ],
+                      [
+                        0.0,
+                        0.0,
+                        -1.0
+                      ]
+                    ],
+                    "frames": [
+                      {
+                        "type": "site",
+                        "name": "robot/left_foot"
+                      },
+                      {
+                        "type": "site",
+                        "name": "robot/right_foot"
+                      }
+                    ],
+                    "ray_alignment": "yaw",
+                    "max_distance": 1.0,
+                    "exclude_parent_body": true,
+                    "include_geom_groups": [
+                      0
+                    ],
+                    "debug_vis": true,
+                    "viz": {
+                      "hit_color": [
+                        1.0,
+                        0.0,
+                        1.0,
+                        0.8
+                      ],
+                      "miss_color": [
+                        1.0,
+                        0.0,
+                        0.0,
+                        0.4
+                      ],
+                      "hit_sphere_color": [
+                        1.0,
+                        0.0,
+                        1.0,
+                        1.0
+                      ],
+                      "hit_sphere_radius": 0.5,
+                      "show_rays": true,
+                      "show_normals": false,
+                      "normal_color": [
+                        1.0,
+                        1.0,
+                        0.0,
+                        1.0
+                      ],
+                      "normal_length": 5.0
+                    }
+                  }
+                },
+                "rewards": {}
+              }
+            }
+          ],
+          "policies": [
+            {
+              "id": "biped_walking",
+              "name": "Biped walking",
+              "mdp": "biped_walking",
+              "onnx": "policy/biped_walking.onnx",
+              "policy_joint_names": [
+                "robot/left_arm_pitch_joint",
+                "robot/left_arm_roll_joint",
+                "robot/left_arm_yaw_joint",
+                "robot/left_elbow_joint",
+                "robot/right_arm_pitch_joint",
+                "robot/right_arm_roll_joint",
+                "robot/right_arm_yaw_joint",
+                "robot/right_elbow_joint",
+                "robot/left_hip_pitch_joint",
+                "robot/left_hip_roll_joint",
+                "robot/left_hip_yaw_joint",
+                "robot/left_knee_joint",
+                "robot/left_ankle_joint",
+                "robot/right_hip_pitch_joint",
+                "robot/right_hip_roll_joint",
+                "robot/right_hip_yaw_joint",
+                "robot/right_knee_joint",
+                "robot/right_ankle_joint",
+                "robot/head_pitch_joint",
+                "robot/head_roll_joint",
+                "robot/head_yaw_joint",
+                "robot/tail_pitch_joint",
+                "robot/tail_yaw_joint"
+              ],
+              "default_joint_pos": [
+                0.0,
+                -0.9250245035569946,
+                0.0,
+                0.0,
+                0.0,
+                0.9250245035569946,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "encoder_bias": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "initial_qpos": [
+                0.0,
+                0.0,
+                0.2318575551806145,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                -0.9250245035569946,
+                0.0,
+                0.0,
+                0.0,
+                0.9250245035569946,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          ]
+        },
+        {
+          "id": "quadruped_crawling",
+          "name": "Quadruped crawling",
+          "scene": "scene.mjz",
+          "control_dt": 0.02,
+          "camera": {
+            "lookat": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "distance": 1.2,
+            "elevation": -5.0,
+            "azimuth": 90.0,
+            "origin_type": "ASSET_BODY",
+            "height": 240,
+            "width": 320,
+            "fovy": 45.0,
+            "entity_name": "robot",
+            "body_name": "base_link"
+          },
+          "graphics": {
+            "color_management": "classic",
+            "tone_mapping": "pbr_neutral",
+            "exposure": 0.0,
+            "output_color_space": "srgb",
+            "base_color_type": "srgb",
+            "enable_shadows": true,
+            "enable_reflections": true,
+            "enable_haze": true
+          },
+          "mdps": [
+            {
+              "id": "quadruped_crawling",
+              "commands": {
+                "twist": {
+                  "name": "UiCommand",
+                  "ui": {
+                    "inputs": [
+                      {
+                        "type": "slider",
+                        "name": "lin_vel_x",
+                        "label": "Forward Velocity",
+                        "min": -0.15,
+                        "max": 0.5,
+                        "step": 0.05,
+                        "default": 0.0
+                      },
+                      {
+                        "type": "slider",
+                        "name": "lin_vel_y",
+                        "label": "Lateral Velocity",
+                        "min": -0.08,
+                        "max": 0.08,
+                        "step": 0.05,
+                        "default": 0.0
+                      },
+                      {
+                        "type": "slider",
+                        "name": "ang_vel_z",
+                        "label": "Yaw Rate",
+                        "min": -0.2,
+                        "max": 0.2,
+                        "step": 0.05,
+                        "default": 0.0
+                      }
+                    ]
+                  }
+                }
+              },
+              "actions": {
+                "joint_pos": {
+                  "type": "joint_position",
+                  "scale": {
+                    "robot/left_hip_pitch_joint": 0.35,
+                    "robot/right_hip_pitch_joint": 0.35,
+                    "robot/left_hip_roll_joint": 0.15,
+                    "robot/right_hip_roll_joint": 0.15,
+                    "robot/left_hip_yaw_joint": 0.15,
+                    "robot/right_hip_yaw_joint": 0.15,
+                    "robot/left_knee_joint": 0.3,
+                    "robot/right_knee_joint": 0.3,
+                    "robot/left_ankle_joint": 0.25,
+                    "robot/right_ankle_joint": 0.25,
+                    "robot/left_arm_pitch_joint": 0.25,
+                    "robot/right_arm_pitch_joint": 0.25,
+                    "robot/left_arm_roll_joint": 0.25,
+                    "robot/right_arm_roll_joint": 0.25,
+                    "robot/left_arm_yaw_joint": 0.2,
+                    "robot/right_arm_yaw_joint": 0.2,
+                    "robot/left_elbow_joint": 0.5,
+                    "robot/right_elbow_joint": 0.5,
+                    "robot/head_pitch_joint": 0.25,
+                    "robot/head_roll_joint": 0.25,
+                    "robot/head_yaw_joint": 0.25,
+                    "robot/tail_pitch_joint": 0.25,
+                    "robot/tail_yaw_joint": 0.25
+                  },
+                  "actuator_names": [
+                    "robot/.*"
+                  ],
+                  "use_default_offset": true
+                }
+              },
+              "observations": {
+                "actor": {
+                  "fused": "mdp/quadruped_crawling/obs/actor.onnx",
+                  "input_slots": [
+                    {
+                      "action": "action",
+                      "input": "action__action",
+                      "shape": [
+                        1,
+                        23
+                      ]
+                    },
+                    {
+                      "command": "twist",
+                      "field": "command",
+                      "input": "command__twist_command",
+                      "shape": [
+                        1,
+                        3
+                      ]
+                    },
+                    {
+                      "env": "episode_length_buf",
+                      "input": "env__episode_length_buf",
+                      "shape": [
+                        1
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "joint_pos_biased",
+                      "input": "robot__joint_pos_biased",
+                      "shape": [
+                        1,
+                        23
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "joint_vel",
+                      "input": "robot__joint_vel",
+                      "shape": [
+                        1,
+                        23
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "projected_gravity_b",
+                      "input": "robot__projected_gravity_b",
+                      "shape": [
+                        1,
+                        3
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "root_link_ang_vel_w",
+                      "input": "robot__root_link_ang_vel_w",
+                      "shape": [
+                        1,
+                        3
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "root_link_lin_vel_w",
+                      "input": "robot__root_link_lin_vel_w",
+                      "shape": [
+                        1,
+                        3
+                      ]
+                    },
+                    {
+                      "entity": "robot",
+                      "field": "root_link_quat_w",
+                      "input": "robot__root_link_quat_w",
+                      "shape": [
+                        1,
+                        4
+                      ]
+                    }
+                  ],
+                  "layout": [
+                    {
+                      "name": "base_lin_vel",
+                      "size": 3,
+                      "func": "pikachu.browser.terms:heading_lin_vel"
+                    },
+                    {
+                      "name": "base_ang_vel",
+                      "size": 3,
+                      "func": "pikachu.browser.terms:heading_ang_vel"
+                    },
+                    {
+                      "name": "projected_gravity",
+                      "size": 3,
+                      "func": "mjlab.envs.mdp.observations:projected_gravity"
+                    },
+                    {
+                      "name": "joint_pos",
+                      "size": 23,
+                      "func": "mjlab.envs.mdp.observations:joint_pos_rel",
+                      "params": {
+                        "biased": true
+                      }
+                    },
+                    {
+                      "name": "joint_vel",
+                      "size": 23,
+                      "func": "mjlab.envs.mdp.observations:joint_vel_rel"
+                    },
+                    {
+                      "name": "actions",
+                      "size": 23,
+                      "func": "mjlab.envs.mdp.observations:last_action"
+                    },
+                    {
+                      "name": "command",
+                      "size": 3,
+                      "func": "mjlab.envs.mdp.observations:generated_commands",
+                      "params": {
+                        "command_name": "twist"
+                      }
+                    },
+                    {
+                      "name": "crawl_phase",
+                      "size": 2,
+                      "func": "mjlab.tasks.velocity.config.pikachu_v035_crawl.mdp:phase_observation"
+                    }
+                  ],
+                  "size": 83
+                }
+              }
+            }
+          ],
+          "policies": [
+            {
+              "id": "quadruped_crawling",
+              "name": "Quadruped crawling",
+              "mdp": "quadruped_crawling",
+              "onnx": "policy/quadruped_crawling.onnx",
+              "policy_joint_names": [
+                "robot/left_arm_pitch_joint",
+                "robot/left_arm_roll_joint",
+                "robot/left_arm_yaw_joint",
+                "robot/left_elbow_joint",
+                "robot/right_arm_pitch_joint",
+                "robot/right_arm_roll_joint",
+                "robot/right_arm_yaw_joint",
+                "robot/right_elbow_joint",
+                "robot/left_hip_pitch_joint",
+                "robot/left_hip_roll_joint",
+                "robot/left_hip_yaw_joint",
+                "robot/left_knee_joint",
+                "robot/left_ankle_joint",
+                "robot/right_hip_pitch_joint",
+                "robot/right_hip_roll_joint",
+                "robot/right_hip_yaw_joint",
+                "robot/right_knee_joint",
+                "robot/right_ankle_joint",
+                "robot/head_pitch_joint",
+                "robot/head_roll_joint",
+                "robot/head_yaw_joint",
+                "robot/tail_pitch_joint",
+                "robot/tail_yaw_joint"
+              ],
+              "default_joint_pos": [
+                1.9616910080494938,
+                -1.4835298641951802,
+                1.5707963267948966,
+                0.0,
+                -1.9616910080494938,
+                1.4835298641951802,
+                -1.5707963267948966,
+                0.0,
+                1.327922,
+                -0.018688,
+                -0.066052,
+                0.278583,
+                -0.34906585039886584,
+                -1.327922,
+                0.018688,
+                0.066052,
+                -0.278583,
+                0.34906585039886584,
+                -0.7853981633974483,
+                0.0,
+                0.0,
+                -2.007128639793479,
+                0.0
+              ],
+              "encoder_bias": [
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "initial_qpos": [
+                0.0,
+                0.0,
+                0.22213926560553537,
+                0.7648421872844885,
+                0.0,
+                0.644217687237691,
+                0.0,
+                1.9616910080494938,
+                -1.4835298641951802,
+                1.5707963267948966,
+                0.0,
+                -1.9616910080494938,
+                1.4835298641951802,
+                -1.5707963267948966,
+                0.0,
+                1.327922,
+                -0.018688,
+                -0.066052,
+                0.278583,
+                -0.34906585039886584,
+                -1.327922,
+                0.018688,
+                0.066052,
+                -0.278583,
+                0.34906585039886584,
+                -0.7853981633974483,
+                0.0,
+                0.0,
+                -2.007128639793479,
                 0.0
               ]
             }
