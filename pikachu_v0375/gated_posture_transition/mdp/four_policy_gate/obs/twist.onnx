@@ -1,16 +1,0 @@
-mjswan0.13.12Tmjswan obs graph 'twist', traced from mjlab.envs.mdp.observations:generated_commands:ê
-5
-command__twist_commandvalue
-Identity_0"Identity
-main_graphZ-
-command__twist_command
-
-batch
-b
-value
-
-batch
-Br
-mjswan.kindobsr
-mjswan.termtwistr=
-mjswan.func.mjlab.envs.mdp.observations:generated_commands
