@@ -1,0 +1,24 @@
+{
+  "mjlab_base_commit": "1e6a0ae4adcdb437c33eb071afa40ee5dd27242f",
+  "mjlab_worktree": "dirty; prior generation-routing changes are uncommitted",
+  "mjlab_tracked_diff_sha256": "b39dfe3a24e31367b599f83bd725962ca77e088c7e635c366080f04c2d6879d2",
+  "mjswan_base_commit": "2def7539",
+  "source_files_sha256": {
+    "src/mjlab/sim2sim/config.py": "48eb66b40e039b15a6b5b23b75ef99385a90b02a49290c18ec11a3093e636821",
+    "src/mjlab/sim2sim/controllers.py": "c617fb3f31edc7a295973a3c7d61f4131ed874e291b216d6797a653ead314b7e",
+    "src/mjlab/sim2sim/env_cfg.py": "9546e9104dbda2f0a2638306ed0dcb46f41dec718a023c0172719e0df63c02bf",
+    "src/mjlab/sim2sim/commands.py": "535032ce643f06f41b1d6de094c439dbca2d31b5f307a0b4cb242a525dba2351",
+    "src/mjlab/sim2sim/onnx_policy.py": "bfd05fb2bb7b311dfeecb1292a9ab4c49f018ed87247910466f084066945a498",
+    "src/mjlab/sim2sim_gate/gating.py": "53ce459aa5753b2005162e22634a353f985a57bcf6107e91a634b2b2d964b163",
+    "src/mjlab/sim2sim_gate/runner.py": "3b1e4b636c44062b382ddd6d33c71ceeb6f3c6886b66d5d9e9ff4011eba7182c"
+  },
+  "spec_read": [
+    "spec/agent-defaults.md",
+    "spec/git-management.md",
+    "spec/pre-train-corpus.md",
+    "spec/model-import.md",
+    "spec/training-environment.md"
+  ],
+  "validation": "440-step local gate launcher trace equals mjlab baseline; offline ONNX compared with four actor sessions; browser build did not pass",
+  "exception": "Source models are simulation candidates; remote backup and formal v0375 evaluation remain pending."
+}

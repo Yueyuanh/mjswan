@@ -80,3 +80,7 @@ src/mjswan/template/public/_headers
 
 # Skins are fetched from the Hugging Face Hub (examples/demo/main.py), never committed
 *.vrm
+
+# Local Pikachu policy artifacts, regenerated or copied from the selected corpus.
+/pikachu/models/**/*.onnx
+/pikachu/models/**/*gate.json

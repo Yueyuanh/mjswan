@@ -1,0 +1,9 @@
+{
+  "source": "mjlab/src/mjlab/sim2sim/models/v0375",
+  "sha256": {
+    "biped.onnx": "adb980c12ccdc3ae6a47eb368c3ce6fea85ad8fbd0c497498877fed711646372",
+    "crawl.onnx": "e59c5c5d4b7e13da8a08797f081ae78e4f563cf6f85a6cb5588d9c1a4631d5a7",
+    "transition_down.onnx": "9d5ca2a604a92b00fd0049bcfe09c1c4bdee1f931303b5d4231a1a4b9b29ba87",
+    "transition_up.onnx": "e44e9e4a4f9e6530ee7e9edb4f82a08f62bb14c1e3a21077be4ddd27c8edb9c2"
+  }
+}
