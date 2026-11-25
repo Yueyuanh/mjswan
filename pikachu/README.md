@@ -1,12 +1,14 @@
-# Pikachu V0375 gate integration
+# Pikachu V0375 browser simulation
 
 ## Status
 
-This directory contains an **offline integration and a local mjlab launcher**. The
-browser port is not complete and there is no deployable mjswan document yet. The
-original V037 transition actors are reused on V0375; all four policies are simulation
-candidates. No hardware deployment or complete V0375 evaluation is claimed.
+The mjswan browser app has two independently selectable scenes: biped walking and
+quadruped crawling. The four-policy posture gate is a separate, unfinished integration.
+The policies are simulation candidates; no hardware deployment or full browser
+behavioral evaluation is claimed.
 
+- `browser/main.py`: builds the two independent mjswan browser scenes.
+- `browser/terms.py`: trace-compatible crawl heading observations.
 - `legacy/run_gate.py`: launches the existing mjlab gate with local model copies.
 - `models/v0375/manifest.json`: source model checksums. ONNX files are local artifacts
   and are excluded from Git.
@@ -46,6 +48,41 @@ For mjswan build development, install this local checkout in the same environmen
 uv pip install --python ../mjlab/.venv/bin/python -e .
 ```
 
+## Build and run the browser app
+
+From `mjswan/`, after the setup above:
+
+```sh
+uv run --project ../mjlab python -m pikachu.browser.main --build-only
+uv run --project ../mjlab mjswan serve pikachu/dist --host 127.0.0.1 --port 8080
+```
+
+Open `http://127.0.0.1:8080/`. In **Scene**, select **Biped walking** or
+**Quadruped crawling**. Use the three **Twist** controls to set forward, lateral,
+and turning velocity; they start at zero. Reset returns the chosen scene to its
+training task's initial pose. Each scene runs one policy: they do not transition
+between postures.
+
+To serve to other devices on a trusted local network, run:
+
+```sh
+uv run --project ../mjlab mjswan serve pikachu/dist --host 0.0.0.0 --port 8080 --no-open
+```
+
+Open `http://<this-computer-lan-ip>:8080/` on the other device. For a static-site
+host, upload the contents of `pikachu/dist/` as a static site and preserve its
+relative paths; configure cross-origin isolation if the browser or hosting setup
+requires it. The site runs MuJoCo and ONNX Runtime in the browser. This repository
+does not automatically publish it to a public service.
+
+Both scenes built with mjswan 0.13.1. Observation parity passed over 16 steps per
+scene and headless Chrome loaded each scene and accepted a 0.1 m/s forward command
+without a browser error. This verifies loading and controls, not gait quality or
+long-run stability. The crawl checkpoint has the previously recorded backward-motion
+limitations. The scene starts with nominal settings, with training randomization and
+termination terms disabled. MuJoCo Warp reported that CAPSULE/MESH pairs have at most
+one contact with MULTICCD; browser MuJoCo physics can differ from training physics.
+
 ## Run locally
 
 ```sh
@@ -78,7 +115,7 @@ by Git. The test compares its output against independent ONNX Runtime actor sess
 The graph requires correctly constructed actor observations and state on every step;
 it is not a self-contained controller.
 
-## Browser build and deployment
+## Four-policy gate status
 
 A browser build was attempted with the combined graph and the actual V0375 scene. It
 failed before a valid document was produced. The first attempt could not trace
@@ -90,7 +127,15 @@ observation would be frozen. The gate additionally needs phase, direction, both 
 clips, and reference re-anchoring wired to browser state. Ignoring these warnings would
 produce a controller with the wrong inputs.
 
-Consequently there is no `mjswan serve` or deployment command for this port yet. Finish
+Consequently the two-scene app above cannot switch postures. Finish
 and independently validate those observation and command mappings, build a real mjswan
 document, and run numeric and browser closed-loop parity before publishing it. The
 original V0375 candidate and mjlab gate limitations remain applicable.
+
+
+## Task record
+
+- mjlab base_commit: `1e6a0ae4adcdb437c33eb071afa40ee5dd27242f` (source working tree dirty; see `gate/provenance.json`).
+- mjswan base_commit: `86974d21`.
+- spec_read: `spec/agent-defaults.md`, `spec/git-management.md`.
+- No training or formal behavior evaluation was performed; parity and browser startup checks are the available evidence.
