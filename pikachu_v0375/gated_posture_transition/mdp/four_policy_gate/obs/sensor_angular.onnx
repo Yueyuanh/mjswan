@@ -1,0 +1,16 @@
+mjswan0.13.12Ymjswan obs graph 'sensor_angular', traced from mjlab.envs.mdp.observations:builtin_sensor:–
+8
+sensor__robot_imu_ang_velvalue
+Identity_0"Identity
+main_graphZ0
+sensor__robot_imu_ang_vel
+
+batch
+b
+value
+
+batch
+Br
+mjswan.kindobsr
+mjswan.termsensor_angularr9
+mjswan.func*mjlab.envs.mdp.observations:builtin_sensor
