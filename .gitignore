@@ -84,3 +84,6 @@ src/mjswan/template/public/_headers
 # Local Pikachu policy artifacts, regenerated or copied from the selected corpus.
 /pikachu/models/**/*.onnx
 /pikachu/models/**/*gate.json
+
+# This branch carries the built Pikachu site for static hosting.
+!/pikachu/dist/

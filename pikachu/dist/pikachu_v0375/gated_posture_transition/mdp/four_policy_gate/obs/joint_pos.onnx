@@ -1,0 +1,16 @@
+mjswan0.13.12Rmjswan obs graph 'joint_pos', traced from pikachu.browser.gated:absolute_joint_pos:„
+/
+robot__joint_posvalue
+Identity_0"Identity
+main_graphZ'
+robot__joint_pos
+
+batch
+b
+value
+
+batch
+Br
+mjswan.kindobsr
+mjswan.term	joint_posr7
+mjswan.func(pikachu.browser.gated:absolute_joint_pos
