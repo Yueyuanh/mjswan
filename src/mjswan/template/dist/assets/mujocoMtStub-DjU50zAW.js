@@ -1,1 +1,0 @@
-function e(){throw Error(`mjswan: this app was built without multithreading (Builder(mt=True)).`)}export{e as default};
