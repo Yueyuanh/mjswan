@@ -20,6 +20,30 @@ evaluation is claimed.
 - `tests/test_gate_graph.py`: compares the combined ONNX against four separate actors.
 - `doc/`: pre-existing design materials, preserved separately.
 
+## Start
+
+From `mjswan/`, after the model sync in [Setup](#setup):
+
+```sh
+uv run --project ../mjlab python -m pikachu.browser.main
+```
+
+This builds `pikachu/dist/` (composing `models/v0375/gate_wide.onnx` on the first
+build) and opens `http://localhost:8080/`. Variants:
+
+```sh
+# serve the existing build, no rebuild
+uv run --project ../mjlab python -m pikachu.browser.main --no-build
+
+# build only, no server
+uv run --project ../mjlab python -m pikachu.browser.main --build-only
+
+# serve to the LAN without opening a browser
+uv run --project ../mjlab python -m pikachu.browser.main --no-build --host 0.0.0.0 --no-open
+```
+
+If port 8080 is taken, the server moves to the next free port and prints the URL.
+
 ## Setup
 
 Use this workspace layout and the existing mjlab environment:
@@ -52,16 +76,21 @@ uv pip install --python ../mjlab/.venv/bin/python -e .
 From `mjswan/`, after the setup above:
 
 ```sh
-uv run --project ../mjlab python -m pikachu.gate.wide
 uv run --project ../mjlab python -m pikachu.browser.main --build-only
-uv run --project ../mjlab mjswan serve pikachu/dist --host 127.0.0.1 --port 8080
+uv run --project ../mjlab python -m pikachu.browser.main --no-build
 ```
 
-Open `http://127.0.0.1:8080/`. The default scene is **Gated posture transition**;
+The first command rebuilds `pikachu/dist/`; the second serves it at
+`http://localhost:8080/`. Running `python -m pikachu.browser.main` with neither flag
+does both and opens the browser. The default scene is **Gated posture transition**;
 use **Scene** to select **Biped walking** or **Quadruped crawling** instead.
 Use the three **Twist** controls to set forward, lateral,
 and turning velocity; they start at zero. Reset returns the chosen scene to its
-initial pose. In the gated scene, use **切换四足** or **切换双足** in **Posture**.
+initial pose. The keyboard drives the same commands: W/S, A/D and Q/E ramp forward/back,
+left/right and turning to 75% of each axis's limit over about 0.8 s, the Twist sliders
+follow, and opposing keys (W+S, A+D, Q+E) cancel an axis. F toggles posture in the gated
+scene, Z hides the panel, R resets; a top-left HUD lists the keys and hides with the
+panel (Z hides both). In the gated scene, use **切换四足** or **切换双足** in **Posture**.
 The button shows simulation progress and is disabled until the transition finishes.
 During each transition, the velocity sliders are set to zero; set them again afterward.
 In quadruped crawling and the gated crawl mode, forward and lateral velocity commands
@@ -73,7 +102,7 @@ The transition takes about four seconds of simulation time.
 To serve to other devices on a trusted local network, run:
 
 ```sh
-uv run --project ../mjlab mjswan serve pikachu/dist --host 0.0.0.0 --port 8080 --no-open
+uv run --project ../mjlab python -m pikachu.browser.main --no-build --host 0.0.0.0 --port 8080 --no-open
 ```
 
 Open `http://<this-computer-lan-ip>:8080/` on the other device. For a static-site

@@ -5,8 +5,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
 import shutil
+import subprocess
+import sys
+from pathlib import Path
 
 import onnx
 from mjlab.scene import Scene
@@ -16,6 +18,10 @@ import mjswan
 from pikachu.browser import terms  # noqa: F401
 
 HERE = Path(__file__).resolve().parents[1]
+DIST = HERE / "dist"
+MODELS = HERE / "models" / "v0375"
+#: The four actor graphs sync_models copies from the mjlab checkout.
+MODEL_FILES = ("biped.onnx", "crawl.onnx", "transition_down.onnx", "transition_up.onnx")
 
 
 def initial_qpos(cfg, spec):
@@ -82,13 +88,49 @@ def build():
     return app
 
 
-def main():
+def ensure_models() -> None:
+    """Fail with the sync command, and compose the gate graph on its first build."""
+    missing = [name for name in MODEL_FILES if not (MODELS / name).exists()]
+    if missing:
+        raise SystemExit(
+            f"Missing model files in {MODELS}: {', '.join(missing)}\n"
+            "Sync them from the mjlab checkout first:\n"
+            "  uv run --project ../mjlab python -m pikachu.gate.sync_models"
+        )
+    if not (MODELS / "gate_wide.onnx").exists():
+        print("Composing models/v0375/gate_wide.onnx (first build only)...")
+        subprocess.run(
+            [sys.executable, "-m", "pikachu.gate.wide"], cwd=HERE.parent, check=True
+        )
+
+
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--build-only", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--build-only", action="store_true", help="Build pikachu/dist and exit."
+    )
+    mode.add_argument(
+        "--no-build",
+        action="store_true",
+        help="Serve the existing pikachu/dist without rebuilding.",
+    )
+    parser.add_argument("--host", default="localhost", help="Host to bind.")
+    parser.add_argument("--port", type=int, default=8080, help="Port to bind.")
+    parser.add_argument(
+        "--no-open", action="store_true", help="Print the URL instead of opening it."
+    )
     args = parser.parse_args()
-    app = build()
+
+    if args.no_build:
+        if not (DIST / "index.html").exists():
+            raise SystemExit(f"{DIST} is not built; run without --no-build first.")
+        app = mjswan.MjswanApp(DIST)
+    else:
+        ensure_models()
+        app = build()
     if not args.build_only:
-        app.launch()
+        app.launch(host=args.host, port=args.port, open_browser=not args.no_open)
 
 
 if __name__ == "__main__":

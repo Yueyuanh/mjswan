@@ -39,6 +39,7 @@ import { SliderRow } from './SliderRow';
 import { SplatSection } from './SplatSection';
 import { ViewerGuiSection, type ViewerGuiBinding } from './ViewerGuiSection';
 import VIEWER_GUI_PATHS from './viewer_gui_bindings.json';
+import { isEditableElement } from '../teleop/keys';
 import type { ViewerGuiNode } from '../manifest';
 import type {
   CommandDescriptor,
@@ -149,22 +150,6 @@ interface ControlPanelProps {
   onHandTrackingChange?: (enabled: boolean) => void;
   /** The scene in view's third-party components and the work's license, for About. */
   credits: SceneCredits;
-}
-
-function isEditableElement(element: Element | null): boolean {
-  if (!(element instanceof HTMLElement)) {
-    return false;
-  }
-
-  if (element.isContentEditable) {
-    return true;
-  }
-
-  return (
-    element.closest(
-      'input, textarea, select, [contenteditable], [role="textbox"], [role="searchbox"], [role="combobox"]'
-    ) !== null
-  );
 }
 
 /**
@@ -446,7 +431,7 @@ function ControlPanel(props: ControlPanelProps) {
       }
 
       const key = event.key.toLowerCase();
-      if (key !== 'c' && key !== 'r' && key !== 'i') {
+      if (key !== 'c' && key !== 'z' && key !== 'r' && key !== 'i') {
         return;
       }
 
@@ -456,7 +441,7 @@ function ControlPanel(props: ControlPanelProps) {
       }
 
       event.preventDefault();
-      if (key === 'c') {
+      if (key === 'c' || key === 'z') {
         onVisibleChange(!visible);
       } else if (key === 'i') {
         toggleAbout();
@@ -564,7 +549,7 @@ function ControlPanel(props: ControlPanelProps) {
       width="20em"
       visible={visible}
       onVisibleChange={onVisibleChange}
-      hiddenButtonTooltip="Show controls (C)"
+      hiddenButtonTooltip="Show controls (C or Z)"
     >
       <FloatingPanel.Handle>
         <Tooltip label={`mjswan ${MJSWAN_VERSION}`}>

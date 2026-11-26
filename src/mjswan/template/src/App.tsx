@@ -6,9 +6,11 @@ import { LoadingProvider, useLoading } from './contexts/LoadingContext';
 import { Loader } from './components/Loader';
 import { signalReady, signalError } from './core/utils/readySignal';
 import { createEngine } from './engine';
-import type { EnginePlugins, MjswanEngine, MjswanEngineState, SceneInput } from './engine';
+import type { CommandDescriptor, EnginePlugins, MjswanEngine, MjswanEngineState, SceneInput } from './engine';
 import { parseManifest, sanitizeName, type Catalog, type ProjectCatalog, type ByteSource } from './manifest';
 import type { MdpHandlers } from './ControlPanel/MdpSection';
+import { TeleopHud } from './teleop/TeleopHud';
+import { useKeyboardTeleop } from './teleop/keyboardTeleop';
 import {
   applyUrlState,
   DEBUG_PARAM,
@@ -25,6 +27,10 @@ import './App.css';
 
 /** The engine's Debug Viz switch that `?xray=` keeps. */
 const XRAY_SWITCH = 'xray';
+
+/** Stable empties, so the teleop hook does not see a new array every render. */
+const NO_COMMANDS: readonly CommandDescriptor[] = [];
+const NO_VALUES: Readonly<Record<string, number>> = {};
 
 function paramFlag(param: string): boolean {
   return new URLSearchParams(window.location.search).get(param) !== '0';
@@ -87,6 +93,11 @@ function AppContent() {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const engineRef = useRef<MjswanEngine | null>(null);
+  const teleop = useKeyboardTeleop(
+    engineRef,
+    engineState?.commands ?? NO_COMMANDS,
+    engineState?.commandValues ?? NO_VALUES,
+  );
   const mdpHandlers = useMemo<MdpHandlers>(
     () => ({
       onTermination: (name, patch) => engineRef.current?.mdp.terminations.set(name, patch),
@@ -393,6 +404,17 @@ function AppContent() {
     <MantineProvider theme={theme} defaultColorScheme="auto">
       <div className="app">
         <Loader />
+        {panelVisible && teleop.available && (
+          <TeleopHud
+            held={teleop.held}
+            vx={teleop.vx}
+            vy={teleop.vy}
+            vz={teleop.vz}
+            hasPosture={teleop.hasPosture}
+            biped={teleop.biped}
+            transitioning={teleop.transitioning}
+          />
+        )}
         {catalog && sceneEntry && (
           <ControlPanel
             visible={panelVisible}
