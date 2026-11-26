@@ -1,0 +1,16 @@
+# Node 依赖（不进入版本控制，部署时由构建产物提供）
+node_modules/
+src/mjswan/template/node_modules/
+
+# 本地 Node 虚拟环境
+.nodeenv/
+src/mjswan/template/.nodeenv/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# 系统文件
+.DS_Store
