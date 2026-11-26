@@ -1,0 +1,33 @@
+{
+  "status": "offline-composition-only",
+  "samples": 64,
+  "max_abs_error_rad": 5.7220458984375e-06,
+  "inputs": [
+    "biped:81",
+    "crawl:83",
+    "transition_down:130",
+    "transition_up:130",
+    "p:1",
+    "direction:1"
+  ],
+  "output": "joint_target:23",
+  "onnx_sha256": "44504274edd56b39169c22c9d69e1e2f75a39a656bd910a50f6a2d5590c17867",
+  "checkpoints": {
+    "biped": {
+      "path": "/home/finnox/Pikachu/PikachuRobot/pikachu_playground/mjlab/pre_train/rsl_rl/pikachu_v0375/velocity-flat/biped-v037-source-e03-23dof/E03-R01-26-11-17/model_4997.pt",
+      "sha256": "50bb351621b9fbcd4ad603db9615700070177c9392d30c046d7fda88abc3a397"
+    },
+    "crawl": {
+      "path": "/home/finnox/Pikachu/PikachuRobot/pikachu_playground/mjlab/pre_train/rsl_rl/pikachu_v0375/velocity-flat/crawl-yaw-window-reverse-sym-e04-23dof/E04-R01-26-11-25/model_2999.pt",
+      "sha256": "b4e02a89c867b067491768d5fa16a20ccda957fd7f538ba3cd857fb2274b91ca"
+    },
+    "transition_down": {
+      "path": "/home/finnox/Pikachu/PikachuRobot/pikachu_playground/mjlab/pre_train/rsl_rl/pikachu_v0375/tracking-flat/transition-down-e01-23dof/E01-R01-26-11-19/model_2999.pt",
+      "sha256": "60086a98e0f76e5407b32f5220e1d9561a6f9bb442c618aca94f164245be1e7d"
+    },
+    "transition_up": {
+      "path": "/home/finnox/Pikachu/PikachuRobot/pikachu_playground/mjlab/pre_train/rsl_rl/pikachu_v0375/tracking-flat/transition-up-e02-23dof/E02-R03-26-11-19/model_999.pt",
+      "sha256": "fe7d55ce61f836a35f7023cbe6f82e7fc4103d457ed2d9f2dee38714eabe5093"
+    }
+  }
+}
