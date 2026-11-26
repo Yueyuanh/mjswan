@@ -3,6 +3,11 @@ wrangler.jsonc
 
 # 依赖与缓存不参与资产上传
 node_modules
+
+# 本地构建产物与实验缓存（站点只用根目录文件）
+src
+pikachu
+.cache
 **/node_modules
 **/__pycache__
 **/*.py[cod]

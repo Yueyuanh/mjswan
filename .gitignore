@@ -12,5 +12,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# 构建产物与本地实验缓存（不进入发布分支，部署时用根目录站点）
+src/
+pikachu/
+
 # 系统文件
 .DS_Store
