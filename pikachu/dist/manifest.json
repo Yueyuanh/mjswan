@@ -2,7 +2,7 @@
   "format": 11,
   "version": "0.13.1",
   "uses_custom_js": true,
-  "plugins": "assets/plugins.js",
+  "plugins": "assets/plugins-5ce96ede1825bc85.js",
   "viewer_gui": [
     {
       "type": "folder",
@@ -20,7 +20,7 @@
             },
             {
               "type": "slider",
-              "label": "FOV (\u00b0)",
+              "label": "FOV (°)",
               "default": 60,
               "min": 20,
               "max": 150,

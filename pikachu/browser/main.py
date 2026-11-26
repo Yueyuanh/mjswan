@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 from pathlib import Path
+import shutil
 
 import onnx
 from mjlab.scene import Scene
@@ -66,7 +69,17 @@ def build():
             encoder_bias=[0.0] * len(specs[name].joint_names),
             initial_qpos=initial_qpos(cfg, specs[name]),
         )
-    return builder.build(output_dir=HERE / "dist")
+    app = builder.build(output_dir=HERE / "dist")
+    output = HERE / "dist"
+    plugin = output / "assets" / "plugins.js"
+    digest = hashlib.sha256(plugin.read_bytes()).hexdigest()[:16]
+    versioned = plugin.with_name(f"plugins-{digest}.js")
+    shutil.copy2(plugin, versioned)
+    manifest = output / "manifest.json"
+    data = json.loads(manifest.read_text())
+    data["plugins"] = f"assets/{versioned.name}"
+    manifest.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    return app
 
 
 def main():

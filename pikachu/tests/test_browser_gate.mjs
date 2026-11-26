@@ -7,13 +7,22 @@ const browser = await chromium.launch({
   args: ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
 const page = await browser.newPage();
+// Simulate a stale pre-GateTwist module cached at the old unversioned URL.
+await page.route('**/assets/plugins.js', route => route.fulfill({
+  contentType: 'application/javascript', body: 'export const observations = {};',
+}));
 const errors = [];
 page.on('pageerror', e => errors.push(e.message));
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+const pluginRequests = [];
+page.on('request', request => {
+  if (/\/assets\/plugins[^/]*\.js/.test(new URL(request.url()).pathname)) pluginRequests.push(request.url());
+});
 try {
   const base = process.env.PIKACHU_TEST_URL || 'http://127.0.0.1:8765/';
   await page.goto(`${base}?pikachu_debug=1`);
   await page.waitForFunction(() => window.__pikachuGate, {timeout: 30000});
+  assert.ok(pluginRequests.some(url => /plugins-[a-f0-9]{16}\.js/.test(url)), 'expected versioned plugin');
   const velocityBounds = async () => page.locator('[role="slider"]').evaluateAll(
     sliders => sliders.slice(0, 3).map(slider => [
       Number(slider.getAttribute('aria-valuemin')), Number(slider.getAttribute('aria-valuemax')),
