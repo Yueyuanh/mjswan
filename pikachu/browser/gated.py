@@ -12,6 +12,8 @@ from mjlab.sim2sim.env_cfg import make_sim2sim_env_cfg
 
 import mjswan
 from mjswan.mjlab import adapt_observations
+from pikachu.browser.animal_skin import add_animal_skins
+from pikachu.browser.avatar_skin import add_avatar_skins
 from pikachu.browser.main import initial_qpos
 
 HERE = Path(__file__).resolve().parents[1]
@@ -31,7 +33,7 @@ def clip_data(path):
         }
 
 
-def add_gate(project):
+def add_gate(project, humans=(), animals=()):
     specs = build_controller_specs(version="v0375")
     cfg = make_sim2sim_env_cfg(version="v0375")
     biped_cfg = env_cfg_for("biped", version="v0375")
@@ -98,3 +100,7 @@ def add_gate(project):
         encoder_bias=[0.0] * 23,
         initial_qpos=initial_qpos(biped_cfg, specs["biped"]),
     )
+    if humans:
+        add_avatar_skins(scene, humans)
+    if animals:
+        add_animal_skins(scene, animals)

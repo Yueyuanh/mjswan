@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Sequence
 
 import onnx
 from mjlab.scene import Scene
@@ -37,13 +38,35 @@ def initial_qpos(cfg, spec):
     return qpos.tolist()
 
 
-def build():
+def collect_skins(paths: Sequence[Path]) -> list[Path]:
+    """Expand a directory to its VRMs and GLBs (scaled copies excluded)."""
+    found: list[Path] = []
+    for path in paths:
+        path = Path(path).resolve()
+        if path.is_dir():
+            found.extend(
+                sorted(
+                    p
+                    for p in path.iterdir()
+                    if p.suffix.lower() in (".vrm", ".glb") and "_x" not in p.stem
+                )
+            )
+        else:
+            found.append(path)
+    return found
+
+
+def build(output_dir: Path = DIST, skins: Sequence[Path] = ()):
     builder = mjswan.Builder(base_path="./")
     project = builder.add_project(name="Pikachu V0375")
     specs = build_controller_specs(version="v0375")
+    from pikachu.browser.animal_skin import add_animal_skins
+    from pikachu.browser.avatar_skin import add_avatar_skins
     from pikachu.browser.gated import add_gate
 
-    add_gate(project)
+    humans = [p for p in skins if p.suffix.lower() == ".vrm"]
+    animals = [p for p in skins if p.suffix.lower() == ".glb"]
+    add_gate(project, humans, animals)
     for name, label in (("biped", "Biped walking"), ("crawl", "Quadruped crawling")):
         cfg = env_cfg_for(name, version="v0375")
         cfg.events = {}
@@ -75,8 +98,12 @@ def build():
             encoder_bias=[0.0] * len(specs[name].joint_names),
             initial_qpos=initial_qpos(cfg, specs[name]),
         )
-    app = builder.build(output_dir=HERE / "dist")
-    output = HERE / "dist"
+        if humans and name == "biped":
+            add_avatar_skins(scene, humans)
+        if animals and name == "crawl":
+            add_animal_skins(scene, animals)
+    app = builder.build(output_dir=output_dir)
+    output = Path(output_dir)
     plugin = output / "assets" / "plugins.js"
     digest = hashlib.sha256(plugin.read_bytes()).hexdigest()[:16]
     versioned = plugin.with_name(f"plugins-{digest}.js")
@@ -120,15 +147,29 @@ def main() -> None:
     parser.add_argument(
         "--no-open", action="store_true", help="Print the URL instead of opening it."
     )
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=DIST,
+        help="Directory to build, or to serve with --no-build.",
+    )
+    parser.add_argument(
+        "--skin",
+        type=Path,
+        action="append",
+        default=None,
+        help="Add VRM humanoid skins (a file, or a directory of them; local experiment).",
+    )
     args = parser.parse_args()
+    out = args.out.resolve()
 
     if args.no_build:
-        if not (DIST / "index.html").exists():
-            raise SystemExit(f"{DIST} is not built; run without --no-build first.")
-        app = mjswan.MjswanApp(DIST)
+        if not (out / "index.html").exists():
+            raise SystemExit(f"{out} is not built; run without --no-build first.")
+        app = mjswan.MjswanApp(out)
     else:
         ensure_models()
-        app = build()
+        app = build(out, collect_skins(args.skin or []))
     if not args.build_only:
         app.launch(host=args.host, port=args.port, open_browser=not args.no_open)
 
