@@ -143,15 +143,19 @@
 
 ### 1.8 自建皮卡丘皮套 `pikachu_v1`
 
-`pikachu/vrm/pikachu_v1.vrm` 是仓库内的自建皮卡丘皮套（VRM 0.x，471 KB），
-本身就是**机器人尺度**（头顶约 0.25 m、最高 0.46 m），所以不做缩放：`avatar_skin.py` 的
-`ROBOT_SCALE` 里的文件按原尺寸使用，不会生成 `_x*.vrm` 副本。
+`pikachu/vrm/pikachu_v1.vrm` 是仓库内的自建皮卡丘皮套（VRM 0.x，471 KB）。
+原始模型相对机器人偏小（头顶约 0.25 m、最高 0.46 m），构建时放大 **1.8 倍**：
+`avatar_skin.py` 的 `SCALE_FACTORS = {"pikachu_v1": 1.8}` 会把缩放写到骨架根节点，
+生成副本 `pikachu/.cache/scaled/pikachu_v1_x1.800.vrm`（git 忽略），源文件不改。
+放大后整体约 0.83 m 高。骨骼清单、逐骨映射和调参流程见
+[`pikachu/vrm/README.md`](../vrm/README.md)。
 
 ![皮卡丘皮套（biped）](assets/skins/pikachu_v1_biped.png)
 ![皮卡丘皮套（crawl）](assets/skins/pikachu_v1_crawl.png)
 
 - 菜单名 **Pikachu V1**，URL `?skin=pikachu_v1`；
 - 骨骼仍走 `PIKACHU_BONES`（hips→base、头→head_yaw、手臂/腿取最深 link）；
+- 缩放系数只影响皮套显示，不改源文件；改 `SCALE_FACTORS` 或重新导出 VRM 即可；
 - `python -m pikachu.browser.main` 默认就会挂上它（`--no-skin` 可关闭）；
   额外加载云端皮套再传 `--skin pikachu/.cache/skins`。
 

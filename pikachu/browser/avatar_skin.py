@@ -56,8 +56,12 @@ NAMES = {
     "pikachu_v1": "Pikachu V1",
 }
 
-#: Files authored at the robot's own scale, used as they are (no resizing).
-ROBOT_SCALE = frozenset({"pikachu_v1"})
+#: Per-file factors where the authored size is not the wanted one. The hand-made suit
+#: is authored a bit small for the robot; 1.8 was measured by eye against the robot.
+SCALE_FACTORS = {"pikachu_v1": 1.8}
+
+#: Scaled copies live in the ignored cache, so the repo's own skins stay as authored.
+SCALED_DIR = Path(__file__).resolve().parents[1] / ".cache" / "scaled"
 
 
 def _prettify(stem: str) -> str:
@@ -66,8 +70,8 @@ def _prettify(stem: str) -> str:
 
 def scale_for(source: Path) -> float:
     """The factor that puts this avatar's head bone at TARGET_HEAD_HEIGHT."""
-    if source.stem in ROBOT_SCALE:
-        return 1.0
+    if source.stem in SCALE_FACTORS:
+        return SCALE_FACTORS[source.stem]
     skin = read_skin_file(source)
     head = skin.positions(1.0, "+z")[skin.human_bones["head"]]
     return TARGET_HEAD_HEIGHT / float(head[1])
@@ -92,7 +96,8 @@ def scaled_copy(source: Path, factor: float) -> Path:
     payload += b" " * (-len(payload) % 4)
     binary = data[20 + json_len :]
     total = 12 + 8 + len(payload) + len(binary)
-    target = source.with_name(f"{source.stem}_x{factor:.3f}{source.suffix}")
+    SCALED_DIR.mkdir(parents=True, exist_ok=True)
+    target = SCALED_DIR / f"{source.stem}_x{factor:.3f}{source.suffix}"
     target.write_bytes(
         struct.pack("<III", magic, version, total)
         + struct.pack("<II", len(payload), 0x4E4F534A)
