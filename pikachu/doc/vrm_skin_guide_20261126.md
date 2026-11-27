@@ -47,6 +47,7 @@
 | `pixiv/AvatarSample_B.vrm` | VRM 1.0 | 21 MB | pixiv 样例（随文件 meta） |
 | `pixiv/AvatarSample_C.vrm` | VRM 0.x | 20 MB | pixiv 样例（随文件 meta） |
 | `pixiv/VRM1_Constraint_Twist_Sample.vrm` | VRM 1.0 | 10.8 MB | pixiv 样例（随文件 meta） |
+| `pikachu/vrm/pikachu_v1.vrm`（仓库内） | VRM 0.x | 471 KB | 自建皮卡丘皮套（meta: Other） |
 | `quaternius/shiba_inu.glb` | GLB（四足） | 0.85 MB | CC0 1.0 |
 | `quaternius/fox.glb` | GLB（四足，带尾巴 spring） | 0.96 MB | CC0 1.0 |
 | `quaternius/pug.glb` | GLB（四足） | 70 KB | CC0 1.0 |
@@ -139,6 +140,21 @@
 > **Quadruped crawling** 场景。
 
 单独预览四足原始模型（不套机器人）仍可用 `pikachu/.cache/viewer/index.html`。
+
+### 1.8 自建皮卡丘皮套 `pikachu_v1`
+
+`pikachu/vrm/pikachu_v1.vrm` 是仓库内的自建皮卡丘皮套（VRM 0.x，471 KB），
+本身就是**机器人尺度**（头顶约 0.25 m、最高 0.46 m），所以不做缩放：`avatar_skin.py` 的
+`ROBOT_SCALE` 里的文件按原尺寸使用，不会生成 `_x*.vrm` 副本。
+
+![皮卡丘皮套（biped）](assets/skins/pikachu_v1_biped.png)
+![皮卡丘皮套（crawl）](assets/skins/pikachu_v1_crawl.png)
+
+- 菜单名 **Pikachu V1**，URL `?skin=pikachu_v1`；
+- 骨骼仍走 `PIKACHU_BONES`（hips→base、头→head_yaw、手臂/腿取最深 link）；
+- 构建时把 `pikachu/vrm` 作为额外 `--skin` 目录传入。
+
+它适合作为后续“皮卡丘皮套适配”的基线：改这个 VRM 的骨骼/权重/贴图，重新构建即可。
 
 构建时 `add_skin` 还给出了定量提示：自然尺寸下 avatar 的四肢长度是机器人的
 **3.32–3.74 倍**，所以 `retarget="position"` 会明显拉伸（不推荐）。
@@ -314,7 +330,7 @@ scene.add_skin("Avatar", mjswan.SkinConfig(bones=PIKACHU_BONES, source="avatar.v
 cd mjswan
 uv run --project ../mjlab python -m pikachu.browser.main --build-only \
   --out pikachu/.cache/dist_skin \
-  --skin pikachu/.cache/skins
+  --skin pikachu/.cache/skins --skin pikachu/vrm
 ```
 
 预览：

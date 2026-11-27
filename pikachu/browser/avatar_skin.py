@@ -53,7 +53,11 @@ NAMES = {
     "AvatarSample_B": "AvatarSample B",
     "AvatarSample_C": "AvatarSample C",
     "VRM1_Constraint_Twist_Sample": "Constraint Twist",
+    "pikachu_v1": "Pikachu V1",
 }
+
+#: Files authored at the robot's own scale, used as they are (no resizing).
+ROBOT_SCALE = frozenset({"pikachu_v1"})
 
 
 def _prettify(stem: str) -> str:
@@ -62,6 +66,8 @@ def _prettify(stem: str) -> str:
 
 def scale_for(source: Path) -> float:
     """The factor that puts this avatar's head bone at TARGET_HEAD_HEIGHT."""
+    if source.stem in ROBOT_SCALE:
+        return 1.0
     skin = read_skin_file(source)
     head = skin.positions(1.0, "+z")[skin.human_bones["head"]]
     return TARGET_HEAD_HEIGHT / float(head[1])
@@ -100,10 +106,9 @@ def add_avatar_skins(scene, sources: Sequence[Path]) -> None:
     """Add one pikachu-sized skin per VRM, the first being what the scene opens on."""
     for source in sources:
         source = Path(source)
+        factor = scale_for(source)
+        file = source if factor == 1.0 else scaled_copy(source, factor)
         scene.add_skin(
             NAMES.get(source.stem, _prettify(source.stem)),
-            mjswan.SkinConfig(
-                bones=PIKACHU_BONES,
-                source=str(scaled_copy(source, scale_for(source))),
-            ),
+            mjswan.SkinConfig(bones=PIKACHU_BONES, source=str(file)),
         )
