@@ -20,6 +20,7 @@ from typing import Sequence
 
 import mjswan
 from mjswan.document.skin import read_skin_file
+from pikachu.browser import avatar_skin_v1
 
 #: Avatar head height over the floor, in metres: the robot's head link sits around 0.5 m.
 TARGET_HEAD_HEIGHT = 0.5
@@ -56,9 +57,13 @@ NAMES = {
     "pikachu_v1": "Pikachu V1",
 }
 
+TAIL_BONES = {
+    "pikachu_v1": avatar_skin_v1.EXTRA_BONES,
+}
+
 #: Per-file factors where the authored size is not the wanted one. The hand-made suit
-#: is authored a bit small for the robot; 1.8 was measured by eye against the robot.
-SCALE_FACTORS = {"pikachu_v1": 1.8}
+#: is authored a bit small for the robot; 1.6 was measured by eye against the robot.
+SCALE_FACTORS = {"pikachu_v1": 1.6}
 
 #: Scaled copies live in the ignored cache, so the repo's own skins stay as authored.
 SCALED_DIR = Path(__file__).resolve().parents[1] / ".cache" / "scaled"
@@ -113,7 +118,20 @@ def add_avatar_skins(scene, sources: Sequence[Path]) -> None:
         source = Path(source)
         factor = scale_for(source)
         file = source if factor == 1.0 else scaled_copy(source, factor)
+        human_bones = read_skin_file(file).human_bones
         scene.add_skin(
             NAMES.get(source.stem, _prettify(source.stem)),
-            mjswan.SkinConfig(bones=PIKACHU_BONES, source=str(file)),
+            mjswan.SkinConfig(
+                bones={k: v for k, v in PIKACHU_BONES.items() if k in human_bones},
+                source=str(file),
+                extra_bones=TAIL_BONES.get(source.stem, {}),
+                **(
+                    {
+                        "retarget": avatar_skin_v1.RETARGET,
+                        "height_ratio": avatar_skin_v1.HEIGHT_RATIO,
+                    }
+                    if source.stem == "pikachu_v1"
+                    else {}
+                ),
+            ),
         )

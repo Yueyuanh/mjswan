@@ -31,6 +31,7 @@ export interface SkinModel {
    */
   readonly binds: ReadonlyMap<THREE.Object3D, THREE.Matrix4>;
   readonly springBoneManager: VRMSpringBoneManager | null;
+  readonly extraBones: ReadonlyArray<{ node: THREE.Object3D; body: string }>;
   /** `S` in retarget.ts: the turn from the file's frame onto VRM 1.0's, which faces +z. */
   readonly frame: THREE.Quaternion;
   /** Once posed: the rig onto the file's nodes, then what else the file animates. */
@@ -48,7 +49,7 @@ export async function loadSkinModel(data: ArrayBuffer, config: SkinConfig): Prom
     loader.register((parser) => new VRMLoaderPlugin(parser, { springBonePlugin: new BoundedSpringBones(parser) }));
   }
   const gltf = await loader.parseAsync(data, '');
-  return config.format === 'vrm' ? fromVrm(gltf) : fromGltf(gltf, config);
+  return config.format === 'vrm' ? fromVrm(gltf, config) : fromGltf(gltf, config);
 }
 
 /**
@@ -116,10 +117,22 @@ export function paintable(scene: THREE.Object3D): (painted: boolean) => void {
   };
 }
 
-function fromVrm(gltf: GLTF): SkinModel {
+async function fromVrm(gltf: GLTF, config: SkinConfig): Promise<SkinModel> {
   const vrm = gltf.userData.vrm as VRM | undefined;
   if (!vrm) throw new Error('not a VRM file (no VRM or VRMC_vrm extension)');
   checkConstraints(vrm);
+  const extraBones = await Promise.all((config.extra_bones ?? []).map(async ({ node, body }) => ({
+    node: await gltf.parser.getDependency('node', node) as THREE.Object3D, body,
+  })));
+  for (const joint of [...(vrm.springBoneManager?.joints ?? [])]) {
+    for (let node: THREE.Object3D | null = joint.bone; node; node = node.parent) {
+      if (extraBones.some((extra) => extra.node === node)) {
+        vrm.springBoneManager!.deleteJoint(joint);
+        joint.bone.matrixAutoUpdate = true;
+        break;
+      }
+    }
+  }
   VRMUtils.removeUnnecessaryVertices(gltf.scene);
   VRMUtils.combineSkeletons(gltf.scene);
   // Settled once: mjswan sets no expression weight, and each update costs binds x primitives.
@@ -129,6 +142,7 @@ function fromVrm(gltf: GLTF): SkinModel {
     rig: humanoidRig(vrm.humanoid),
     binds: new Map(),
     springBoneManager: vrm.springBoneManager ?? null,
+    extraBones,
     frame: modelFrame(vrm.meta?.metaVersion),
     // `vrm.update` but for its springs, which the skin runs itself, and its expressions, settled above.
     update(dt) {
@@ -164,6 +178,7 @@ async function fromGltf(gltf: GLTF, config: SkinConfig): Promise<SkinModel> {
     rig,
     binds: bindPoses(gltf.scene),
     springBoneManager,
+    extraBones: [],
     frame: new THREE.Quaternion().setFromAxisAngle(UP, -FACING_TURNS[config.facing ?? '+z']),
     update: () => rig.update(),
     dispose: () => VRMUtils.deepDispose(scene),

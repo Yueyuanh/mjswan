@@ -64,6 +64,28 @@ def _rotate(q: list[float], v: tuple[float, float, float]) -> np.ndarray:
 
 
 class TestSkinFile:
+    def test_extra_vrm_nodes_are_resolved_and_validated(self, vrm, tmp_path, robot):
+        from mjswan.build.skin import skin_entry
+
+        data = vrm.read_bytes()
+        size = int.from_bytes(data[12:16], "little")
+        gltf = json.loads(data[20 : 20 + size])
+        index = len(gltf["nodes"])
+        gltf["nodes"].append({"name": "tail"})
+        gltf["nodes"][0]["children"].append(index)
+        path = fx.write_glb(tmp_path / "tail.vrm", gltf)
+        config = SkinConfig(
+            bones=BONES, source=str(path), extra_bones={"tail": "pelvis"}
+        )
+        entry = skin_entry(resolve_skin(config, robot))
+        assert entry["extra_bones"] == [{"node": index, "body": "pelvis"}]
+        with pytest.raises(ValueError, match="no node"):
+            resolve_skin(replace(config, extra_bones={"missing": "pelvis"}), robot)
+        with pytest.raises(ValueError, match="no body"):
+            resolve_skin(replace(config, extra_bones={"tail": "missing"}), robot)
+        with pytest.raises(ValueError, match="humanoid bone"):
+            resolve_skin(replace(config, extra_bones={"hips": "pelvis"}), robot)
+
     def test_a_vrm_1_names_its_bones(self, vrm):
         file = read_skin_file(vrm)
         assert (file.format, file.vrm_version) == ("vrm", "1")

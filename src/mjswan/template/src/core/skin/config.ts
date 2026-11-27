@@ -19,6 +19,8 @@ export interface SkinConfig {
   rest_qpos?: ArrayLike<number>;
   /** Bone -> robot body: VRM humanoid bone names for a VRM, `nodes` keys for a `.glb`. */
   bones: Record<string, string>;
+  /** VRM nodes outside the humanoid, each driven by a robot body. */
+  extra_bones?: Array<{ node: number; body: string }>;
   /** `.glb` only: bone -> node index. The topmost of them carries the position. */
   nodes?: Record<string, number>;
   /** The arms and legs `'hybrid'` bends, as `[upper, lower, end]` bones. */
@@ -39,7 +41,7 @@ export interface SkinConfig {
   height_ratio?: number;
   /** The robot root's height above its soles at the rest pose. Absent: at the zero pose. */
   root_height?: number;
-  /** Added to the avatar's position, in MuJoCo's world frame (x forward, y left, z up), metres. Absent: zero. */
+  /** Added to the skin's position, in MuJoCo's world frame (x forward, y left, z up), metres. Absent: zero. */
   offset?: ArrayLike<number>;
   /** Where the root bone sits on its body, in that body's frame (MuJoCo axes), metres. */
   hips_offset?: ArrayLike<number>;

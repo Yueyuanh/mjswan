@@ -160,6 +160,7 @@ export class Skin {
   private nodes: THREE.Object3D[] = [];
   private world: THREE.Quaternion[] = [];
   private local: THREE.Quaternion[] = [];
+  private extraBones: Array<{ node: THREE.Object3D; bodyId: number; restWorld: THREE.Quaternion; bodyRestInverse: THREE.Quaternion }> = [];
   /** The normalized bone that carries the position, and the body it follows. */
   private rootBone: THREE.Object3D | null = null;
   private rootBody = -1;
@@ -296,6 +297,21 @@ export class Skin {
     const offset = this.config.offset ?? [0, 0, 0];
     this.root.position.set(offset[0], offset[2], -offset[1]);
     this.root.quaternion.copy(this.rig.facing).multiply(frame);
+    this.root.updateMatrixWorld(true);
+    const depth = (node: THREE.Object3D) => {
+      let n = 0;
+      for (let parent = node.parent; parent; parent = parent.parent) n++;
+      return n;
+    };
+    this.extraBones = [...this.model.extraBones].sort((a, b) => depth(a.node) - depth(b.node)).flatMap(({ node, body }) => {
+      const bodyId = findBody(mjModel, body);
+      if (bodyId < 0) {
+        console.warn(`[Skin] extra bone -> ${body}: no such body`);
+        return [];
+      }
+      if (!this.poses.has(bodyId)) this.poses.set(bodyId, newPose());
+      return [{ node, bodyId, restWorld: node.getWorldQuaternion(new THREE.Quaternion()), bodyRestInverse: zeroPose[bodyId].clone().invert() }];
+    });
     const mode = this.config.retarget ?? 'hybrid';
     // Position drives the raw skeleton; hybrid bends the normalized one before it is copied,
     // and with no limbs to bend is rotation.
@@ -389,7 +405,8 @@ export class Skin {
    */
   private bindModelled(mujoco: MainModule, mjModel: MjModel): void {
     const skeleton = this.model.rig;
-    this.root.position.set(0, 0, 0);
+    const offset = this.config.offset ?? [0, 0, 0];
+    this.root.position.set(offset[0], offset[2], -offset[1]);
     this.root.quaternion.identity();
     this.root.updateMatrixWorld(true);
     this.rig = { bones: [], facing: new THREE.Quaternion(), frame: new THREE.Quaternion() };
@@ -583,6 +600,7 @@ export class Skin {
       // avatar is posed once.
       this.pose(rig, 1);
       this.model.update(dt);
+      this.poseExtraBones();
       this.root.updateMatrixWorld(true);
       if (restart) this.springs.reset();
       else this.springs.step(dt);
@@ -600,6 +618,7 @@ export class Skin {
         springs?.reset();
       }
       this.model.update(dt / steps);
+      this.poseExtraBones();
       springs?.update(dt / steps);
     }
     this.settle();
@@ -613,6 +632,15 @@ export class Skin {
     }
     this.rootFrom.copy(this.rootTo);
     this.groundFrom = this.groundTo;
+  }
+
+  private poseExtraBones(): void {
+    for (const { node, bodyId, restWorld, bodyRestInverse } of this.extraBones) {
+      node.parent!.updateWorldMatrix(true, false);
+      const parentInverse = node.parent!.getWorldQuaternion(new THREE.Quaternion()).invert();
+      node.quaternion.copy(this.poses.get(bodyId)!.now).multiply(bodyRestInverse).multiply(restWorld).premultiply(parentInverse);
+      node.updateMatrixWorld(true);
+    }
   }
 
   /**

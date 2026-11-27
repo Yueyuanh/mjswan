@@ -91,6 +91,9 @@ interface ControlPanelProps {
   skins: SelectOption[];
   skinValue: string | null;
   onSkinChange: (value: string | null) => void;
+  skinBeside: boolean;
+  onSkinEnabledChange: (enabled: boolean) => void;
+  onSkinBesideChange: (enabled: boolean) => void;
   /** Whether command controls are enabled */
   commandsEnabled?: boolean;
   /** Command descriptors from the engine state snapshot. */
@@ -330,6 +333,9 @@ function ControlPanel(props: ControlPanelProps) {
     skins,
     skinValue,
     onSkinChange,
+    skinBeside,
+    onSkinEnabledChange,
+    onSkinBesideChange,
     commandsEnabled = false,
     commands,
     commandValues,
@@ -752,6 +758,7 @@ function ControlPanel(props: ControlPanelProps) {
           )}
 
           {skins.length > 0 && (
+            <>
             <LabeledInput id="skin-select" label="Skin">
               <Select
                 id="skin-select"
@@ -769,6 +776,13 @@ function ControlPanel(props: ControlPanelProps) {
                 comboboxProps={{ zIndex: 1000 }}
               />
             </LabeledInput>
+            <LabeledInput id="skin-enabled" label="Show skin">
+              <Checkbox id="skin-enabled" size="xs" checked={skinValue !== null} onChange={(event) => onSkinEnabledChange(event.currentTarget.checked)} />
+            </LabeledInput>
+            <LabeledInput id="skin-beside" label="Side by side">
+              <Checkbox id="skin-beside" size="xs" checked={skinBeside && skinValue !== null} disabled={skinValue === null} onChange={(event) => onSkinBesideChange(event.currentTarget.checked)} />
+            </LabeledInput>
+            </>
           )}
 
           {/* Command Groups - only show if there are commands */}

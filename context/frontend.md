@@ -10,6 +10,7 @@
 - Supports WebXR (VR and passthrough AR) through `engine.xr`; the host draws the buttons. Tracked hands join the sim as bodies, compiled in at the next model build after the switch is turned on.
 - Keyboard teleop (`src/teleop/`) for a scene whose MDP has a `twist` command: W/S, A/D and Q/E ramp each axis to 75% of its own limit (0.8 s), writing through `engine.commands.set` so the panel's sliders follow; opposing keys cancel an axis. F toggles the pikachu gate's `posture:biped` while it is idle, Z hides the panel, R resets, and a top-left HUD lists the keys while the panel is shown (Z hides both).
 - Reads `manifest.json` to discover projects / scenes / MDPs / policies at runtime; `?project=` / `?scene=` / `?policy=` / `?skin=` take ids (`sanitizeName` = `name2id`, pinned by a shared case table: [document.md](document.md)).
+- The skin controls default to showing the skin 0.7 m along world Y beside the robot. X cycles through side by side, skin alone, Xray and robot alone; skin loads are serialized so rapid switches settle on the latest choice. This changes only rendering, not physics.
 - Shows the credits of the scene in view in the About dialog (the panel's logo, or `I`): `ControlPanel/CreditsPanel.tsx` lists the manifest's `credits` and `work`, then the engine's own license, fetching a `NOTICE` when the tab opens and a `LICENSE` when asked.
 
 ## Three layers

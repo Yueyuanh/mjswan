@@ -247,6 +247,23 @@ async function gltfSkin(file: ReturnType<typeof gltfFile>, config: Partial<SkinC
 }
 
 describe('Skin', () => {
+  it.each(['0', '1'] as const)('drives an extra VRM %s bone while the humanoid still follows', async (version) => {
+    const tailIndex = SKELETON.length;
+    const file = vrmFile(version, (json) => {
+      json.nodes.push({ name: 'tail', translation: [0, 0, -0.2], children: [] });
+      json.nodes[0].children.push(tailIndex);
+    });
+    const skin = await Skin.load(file, { ...CONFIG, extra_bones: [{ node: tailIndex, body: 'l_hand' }] });
+    skin.bind(mujoco, robot);
+    skin.update(bodies(0, 0), 0);
+    const tail = skin.root.getObjectByName('tail')!;
+    const before = tail.getWorldQuaternion(new THREE.Quaternion());
+    skin.update(bodies(0, 0.4), 100);
+    const after = tail.getWorldQuaternion(new THREE.Quaternion());
+    expect(after.angleTo(before)).toBeCloseTo(0.4, 5);
+    const hand = skin.root.getObjectByName('leftHand')!;
+    expect(hand.getWorldQuaternion(new THREE.Quaternion()).angleTo(new THREE.Quaternion())).toBeGreaterThan(0.1);
+  });
   it.each(['0', '1'] as const)('loads VRM %s and hangs the arm as the robot does at rest', async (version) => {
     // Robot +x is three.js +x and its left is -z: shoulder (0.2 left, 1.3 up), the upper
     // arm 0.25 down, the forearm 0.25 forward.
@@ -893,6 +910,16 @@ describe('a skin modelled on the robot', () => {
     skinning.mockRestore();
     for (const name of ['torso', 'sleeve', 'elbow']) expectAt(drawn(skin, name), corners(name));
     expect(skin.root.position.length()).toBe(0);
+  });
+
+  it('offsets a modelled skin in world coordinates as its robot moves', async () => {
+    const pose = bodiesAt(0);
+    const original = await posed(pose);
+    const shifted = await posed(pose, { offset: [0, 0.7, 0], hide_robot: false });
+    for (const name of ['torso', 'sleeve', 'elbow']) {
+      expectAt(drawn(shifted, name), drawn(original, name).map((corner) => corner.add(new THREE.Vector3(0, 0, -0.7))));
+    }
+    expect(shifted.hiddenBodies).toEqual([]);
   });
 
   it('moves each mesh as the bodies it is bound to have moved since rest', async () => {

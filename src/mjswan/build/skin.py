@@ -42,6 +42,7 @@ def skin_entry(skin: ResolvedSkin | ResolvedModelledSkin) -> dict[str, Any]:
     return {
         **head,
         "bones": dict(config.bones),
+        **({"extra_bones": skin.extra_bones} if skin.extra_bones else {}),
         **({"nodes": skin.nodes} if skin.nodes else {}),
         **({"limbs": [list(limb) for limb in skin.limbs]} if skin.limbs else {}),
         **({"reparent": [list(m) for m in skin.reparent]} if skin.reparent else {}),

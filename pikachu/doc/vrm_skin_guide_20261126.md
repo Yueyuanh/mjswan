@@ -3,6 +3,7 @@
 > 状态：皮套实验记录；代码、文档与截图提交在 `pikachu_skin` 分支，VRM/GLB 资产因授权
 > 只放在本地 `pikachu/.cache/skins/`（git 忽略）
 > 日期：2026-11-26
+> 历史实验记录：当前 V1 皮套路径与参数见 [V1 说明](../vrm/pikachu_v1/README.md)。
 > `base_commit`（mjlab）：`52fb34a5a5e88ad73b104ef3ce3be0d1b5c59a94`
 > `base_commit`（mjswan）：`8af732cd`（`pikachu_skin` 从此分支切出）
 > `spec_read`：`AGENTS.md`、`CONVENTIONS.md`（workspace）、`mjswan/AGENTS.md`、
@@ -148,7 +149,7 @@
 `avatar_skin.py` 的 `SCALE_FACTORS = {"pikachu_v1": 1.8}` 会把缩放写到骨架根节点，
 生成副本 `pikachu/.cache/scaled/pikachu_v1_x1.800.vrm`（git 忽略），源文件不改。
 放大后整体约 0.83 m 高。骨骼清单、逐骨映射和调参流程见
-[`pikachu/vrm/README.md`](../vrm/README.md)。
+[`pikachu/vrm/pikachu_v1/README.md`](../vrm/pikachu_v1/README.md)。
 
 ![皮卡丘皮套（biped）](assets/skins/pikachu_v1_biped.png)
 ![皮卡丘皮套（crawl）](assets/skins/pikachu_v1_crawl.png)

@@ -21,7 +21,7 @@ from pikachu.browser import terms  # noqa: F401
 HERE = Path(__file__).resolve().parents[1]
 DIST = HERE / "dist"
 #: Skins the repo carries, added to every build unless --no-skin.
-DEFAULT_SKINS = HERE / "vrm"
+DEFAULT_SKINS = HERE / "vrm" / "pikachu_v1"
 MODELS = HERE / "models" / "v0375"
 #: The four actor graphs sync_models copies from the mjlab checkout.
 MODEL_FILES = ("biped.onnx", "crawl.onnx", "transition_down.onnx", "transition_up.onnx")
@@ -46,11 +46,17 @@ def collect_skins(paths: Sequence[Path]) -> list[Path]:
     for path in paths:
         path = Path(path).resolve()
         if path.is_dir():
+            candidates = list(path.iterdir())
+            for directory in path.iterdir():
+                if directory.is_dir() and not directory.name.startswith("."):
+                    candidates.extend(directory.iterdir())
             found.extend(
                 sorted(
                     p
-                    for p in path.iterdir()
-                    if p.suffix.lower() in (".vrm", ".glb") and "_x" not in p.stem
+                    for p in candidates
+                    if p.is_file()
+                    and p.suffix.lower() in (".vrm", ".glb")
+                    and "_x" not in p.stem
                 )
             )
         else:

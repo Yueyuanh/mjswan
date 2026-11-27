@@ -82,6 +82,7 @@ src/mjswan/template/public/_headers
 *.vrm
 # The hand-made Pikachu suit is part of the repo for skin work.
 !/pikachu/vrm/*.vrm
+!/pikachu/vrm/pikachu_v1/pikachu_v1.vrm
 
 # Local Pikachu policy artifacts, regenerated or copied from the selected corpus.
 /pikachu/models/**/*.onnx
@@ -89,3 +90,4 @@ src/mjswan/template/public/_headers
 
 # This branch carries the built Pikachu site for static hosting.
 !/pikachu/dist/
+!/pikachu/dist/pikachu_v0375/*/assets/pikachu_v1.vrm

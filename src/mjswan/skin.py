@@ -252,6 +252,10 @@ class SkinConfig:
     id: str = ""
     """``name2id(name)``, unique within the scene; the bundled file's stem."""
 
+    extra_bones: Mapping[str, str] = field(default_factory=dict)
+    """VRM node name -> robot body for non-humanoid bones such as a tail.
+    Mapped nodes and their descendants are not driven by VRM spring bones."""
+
     def __post_init__(self) -> None:
         if not self.bones:
             raise ValueError("SkinConfig.bones is empty: map at least the root bone.")
@@ -366,6 +370,7 @@ class ResolvedSkin:
     hips_offset: tuple[float, float, float]
     reparent: list[tuple[int, int]] = field(default_factory=list)
     """``(node, new parent)`` indices, in order, for the browser to nest as ``file`` is."""
+    extra_bones: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def path(self) -> str:
@@ -415,6 +420,22 @@ def resolve_skin(
         return _resolve_modelled(config, model)
     file, reparent = _reparented(config, read_skin_file(_local_source(config)))
     rig, nodes, root = _bones(config, file)
+    if config.extra_bones and file.format != "vrm":
+        raise ValueError("extra_bones is only supported for VRM skins.")
+    extra_bones = [
+        {"node": file.node(node), "body": body}
+        for node, body in config.extra_bones.items()
+    ]
+    if any(item["node"] in file.human_bones.values() for item in extra_bones):
+        raise ValueError("extra_bones cannot also be a VRM humanoid bone.")
+    if model is not None:
+        missing = [
+            body
+            for body in config.extra_bones.values()
+            if resolve_body(model, body) is None
+        ]
+        if missing:
+            raise ValueError(f"The scene's model has no body named {missing}.")
     springs = [_spring(chain, file) for chain in config.springs]
     limbs = _limbs(config, rig)
 
@@ -471,6 +492,7 @@ def resolve_skin(
         root_height=root_height,
         hips_offset=hips,
         reparent=reparent,
+        extra_bones=extra_bones,
     )
 
 

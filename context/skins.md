@@ -13,6 +13,7 @@ A skin is a `.vrm` or a `.glb`, both binary glTF, told apart by the VRM extensio
 ### The skeleton, named three ways
 
 - **A VRM** names its own humanoid. The config maps VRM bone names to robot bodies and may not set what the file brings (its humanoid, springs, units, materials, license).
+- VRM `extra_bones` maps named non-humanoid nodes to robot bodies without changing the humanoid mapping. Mapped nodes and their descendants are removed from the spring simulation, so one bone is not driven twice.
 - **A `.glb` given `humanoid`** names its nodes as VRM bones, by a table or a preset (`"mixamo"`). A four-legged animal maps its front legs as arms.
 - **A `.glb` without it** is keyed by node names, with `limbs` naming its arms and legs, for skeletons that are neither.
 

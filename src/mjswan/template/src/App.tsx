@@ -6,11 +6,13 @@ import { LoadingProvider, useLoading } from './contexts/LoadingContext';
 import { Loader } from './components/Loader';
 import { signalReady, signalError } from './core/utils/readySignal';
 import { createEngine } from './engine';
-import type { CommandDescriptor, EnginePlugins, MjswanEngine, MjswanEngineState, SceneInput } from './engine';
+import type { CommandDescriptor, EnginePlugins, MjswanEngine, MjswanEngineState, SceneInput, SkinInput } from './engine';
 import { parseManifest, sanitizeName, type Catalog, type ProjectCatalog, type ByteSource } from './manifest';
 import type { MdpHandlers } from './ControlPanel/MdpSection';
 import { TeleopHud } from './teleop/TeleopHud';
 import { useKeyboardTeleop } from './teleop/keyboardTeleop';
+import { isEditableElement } from './teleop/keys';
+import { nextSkinView } from './teleop/skinView';
 import {
   applyUrlState,
   DEBUG_PARAM,
@@ -31,6 +33,11 @@ const XRAY_SWITCH = 'xray';
 /** Stable empties, so the teleop hook does not see a new array every render. */
 const NO_COMMANDS: readonly CommandDescriptor[] = [];
 const NO_VALUES: Readonly<Record<string, number>> = {};
+
+function besideSkin(input: SkinInput): SkinInput {
+  const offset = input.config.offset ?? [0, 0, 0];
+  return { ...input, config: { ...input.config, hide_robot: false, hide_tendons: false, offset: [offset[0], offset[1] + 0.7, offset[2]] } };
+}
 
 function paramFlag(param: string): boolean {
   return new URLSearchParams(window.location.search).get(param) !== '0';
@@ -86,9 +93,15 @@ function AppContent() {
   const [motionName, setMotionName] = useState<string | null>(null);
   const [splatName, setSplatName] = useState<string | null>(null);
   const [skinName, setSkinName] = useState<string | null>(null);
+  const [skinEnabled, setSkinEnabled] = useState(true);
+  const [skinBeside, setSkinBeside] = useState(() => new URLSearchParams(window.location.search).get(XRAY_PARAM) !== '1');
+  const lastSkinRef = useRef<string | null>(null);
+  const skinQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const skinRequestRef = useRef(0);
   const [debugVisEnabled, setDebugVisEnabled] = useState(() => paramFlag(DEBUG_PARAM));
   const [panelVisible, setPanelVisible] = useState(() => paramFlag(PANEL_PARAM));
   const [xray, setXray] = useState(() => new URLSearchParams(window.location.search).get(XRAY_PARAM) === '1');
+  const viewRef = useRef({ enabled: true, beside: new URLSearchParams(window.location.search).get(XRAY_PARAM) !== '1', xray: new URLSearchParams(window.location.search).get(XRAY_PARAM) === '1' });
   const [engineState, setEngineState] = useState<MjswanEngineState | null>(null);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -142,6 +155,8 @@ function AppContent() {
         const motion = policy?.motions.find((m) => m.default) ?? policy?.motions[0];
         // An empty `?skin=` is the menu's None.
         const skinId = params.get(SKIN_PARAM);
+        setSkinEnabled(skinId !== '');
+        viewRef.current.enabled = skinId !== '';
         const skin = skinId === '' ? undefined : pickById(scene?.skins ?? [], skinId, scene?.skins[0]);
         setCatalog(cat);
         setProjectName(project?.name ?? null);
@@ -150,6 +165,7 @@ function AppContent() {
         setMotionName(motion?.name ?? null);
         setSplatName(scene?.splats[0]?.name ?? null);
         setSkinName(skin?.name ?? null);
+        lastSkinRef.current = skin?.name ?? null;
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : String(err));
@@ -195,6 +211,7 @@ function AppContent() {
           splat: sceneEntry.splats.find((s) => s.name === splatName)?.id ?? null,
           skin: sceneEntry.skins.find((s) => s.name === skinName)?.id ?? null,
         });
+        if (input.skin && viewRef.current.beside) input.skin = besideSkin(input.skin);
         await engine.loadScene(withPlugins(input));
         if (motionName) await engine.setMotion(motionName);
         hideLoading();
@@ -263,26 +280,27 @@ function AppContent() {
     const policy = scene.policies.find((p) => p.default) ?? scene.policies[0];
     const motion = policy?.motions.find((m) => m.default) ?? policy?.motions[0];
     const splat = scene.splats[0] ?? null;
-    const skin = scene.skins[0] ?? null;
+    const skin = skinEnabled ? (scene.skins.find((s) => s.name === lastSkinRef.current) ?? scene.skins[0] ?? null) : null;
     setSceneName(scene.name);
     setPolicyName(policy?.name ?? null);
     setMotionName(motion?.name ?? null);
     setSplatName(splat?.name ?? null);
     setSkinName(skin?.name ?? null);
+    if (skin) lastSkinRef.current = skin.name;
     showLoading(`Loading scene "${scene.name}"…`);
     try {
-      await engine.loadScene(
-        withPlugins(
-          await scene.buildScene({ policy: policy?.id, splat: splat?.id ?? null, skin: skin?.id ?? null }),
-        ),
-      );
+      skinRequestRef.current++;
+      await skinQueueRef.current;
+      const input = await scene.buildScene({ policy: policy?.id, splat: splat?.id ?? null, skin: skin?.id ?? null });
+      if (input.skin && skinBeside) input.skin = besideSkin(input.skin);
+      await engine.loadScene(withPlugins(input));
       if (motion) await engine.setMotion(motion.name);
     } catch (err) {
       console.error('Failed to load scene:', err);
     } finally {
       hideLoading();
     }
-  }, [showLoading, hideLoading, withPlugins]);
+  }, [showLoading, hideLoading, withPlugins, skinBeside, skinEnabled]);
 
   const handleSceneChange = useCallback(async (value: string | null) => {
     const scene = project?.scenes.find((s) => s.name === value);
@@ -347,28 +365,72 @@ function AppContent() {
     }
   }, [sceneEntry, showLoading, hideLoading]);
 
-  const handleSkinChange = useCallback(async (value: string | null) => {
+  const handleSkinChange = useCallback((value: string | null, beside = viewRef.current.beside) => {
     const engine = engineRef.current;
     const skin = value === null ? null : sceneEntry?.skins.find((s) => s.name === value) ?? null;
     setSkinName(value);
+    setSkinEnabled(value !== null);
+    if (value !== null) lastSkinRef.current = value;
+    const request = ++skinRequestRef.current;
     if (!engine || (value !== null && !skin)) return;
-    showLoading(value === null ? 'Removing skin…' : `Loading skin "${value}"…`);
-    try {
-      await engine.setSkin(skin ? await skin.build() : null);
-    } catch (err) {
-      console.error('Failed to load skin:', err);
-    } finally {
-      hideLoading();
-    }
+    skinQueueRef.current = skinQueueRef.current.then(async () => {
+      if (request !== skinRequestRef.current) return;
+      showLoading(value === null ? 'Removing skin…' : `Loading skin "${value}"…`);
+      try {
+        const input = skin ? await skin.build() : null;
+        if (request !== skinRequestRef.current) return;
+        await engine.setSkin(input && beside ? besideSkin(input) : input);
+        if (request === skinRequestRef.current) engine.debugVis.set(XRAY_SWITCH, viewRef.current.xray);
+      } catch (err) {
+        console.error('Failed to load skin:', err);
+      } finally {
+        hideLoading();
+      }
+    });
   }, [sceneEntry, showLoading, hideLoading]);
 
+  const setSkinView = useCallback((enabled: boolean, beside: boolean, through: boolean) => {
+    const previous = viewRef.current;
+    viewRef.current = { enabled, beside, xray: through };
+    setSkinBeside(beside);
+    setXray(through);
+    if (through && !debugVisEnabled) {
+      setDebugVisEnabled(true);
+      engineRef.current?.debugVis.setEnabled(true);
+    }
+    if (!enabled && skinName) lastSkinRef.current = skinName;
+    const value = enabled ? (skinName ?? sceneEntry?.skins.find((s) => s.name === lastSkinRef.current)?.name ?? sceneEntry?.skins[0]?.name ?? null) : null;
+    if (enabled !== previous.enabled || (enabled && beside !== previous.beside)) handleSkinChange(value, beside);
+    else engineRef.current?.debugVis.set(XRAY_SWITCH, through);
+  }, [debugVisEnabled, handleSkinChange, sceneEntry, skinName]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== 'KeyX' || event.repeat || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || !sceneEntry?.skins.length) return;
+      const target = event.target instanceof Element ? event.target : document.activeElement;
+      if (isEditableElement(target) && !(target instanceof HTMLInputElement && target.type === 'checkbox')) return;
+      event.preventDefault();
+      const next = nextSkinView(viewRef.current);
+      setSkinView(next.enabled, next.beside, next.xray);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [sceneEntry, setSkinView]);
+
   const handleDebugVisChange = useCallback((id: string, enabled: boolean) => {
-    if (id === XRAY_SWITCH) setXray(enabled);
+    if (id === XRAY_SWITCH) {
+      setSkinView(true, enabled ? false : viewRef.current.beside, enabled);
+      return;
+    }
     engineRef.current?.debugVis.set(id, enabled);
-  }, []);
+  }, [setSkinView]);
 
   const handleDebugVisEnabledChange = useCallback((enabled: boolean) => {
     setDebugVisEnabled(enabled);
+    if (!enabled && viewRef.current.xray) {
+      viewRef.current.xray = false;
+      setXray(false);
+    }
     engineRef.current?.debugVis.setEnabled(enabled);
   }, []);
 
@@ -445,7 +507,17 @@ function AppContent() {
             onMotionChange={handleMotionChange}
             skins={options(sceneEntry.skins)}
             skinValue={skinName}
-            onSkinChange={handleSkinChange}
+            onSkinChange={(value) => {
+              viewRef.current.enabled = value !== null;
+              handleSkinChange(value);
+            }}
+            skinBeside={skinBeside}
+            onSkinEnabledChange={(enabled) => {
+              setSkinView(enabled, enabled ? viewRef.current.beside : false, false);
+            }}
+            onSkinBesideChange={(enabled) => {
+              setSkinView(true, enabled, false);
+            }}
             commandsEnabled={!!policyName}
             commands={engineState?.commands ? [...engineState.commands] : []}
             commandValues={engineState?.commandValues ?? {}}

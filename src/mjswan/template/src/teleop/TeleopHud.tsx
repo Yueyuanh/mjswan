@@ -116,6 +116,10 @@ export function TeleopHud({
           </Flex>
         )}
         <Flex align="center" gap="0.45em">
+          <Keycap label="X" />
+          <Text style={{ fontSize: '0.8em' }}>Skin view</Text>
+        </Flex>
+        <Flex align="center" gap="0.45em">
           <Keycap label="Z" />
           <Text style={{ fontSize: '0.8em' }}>Sidebar</Text>
         </Flex>

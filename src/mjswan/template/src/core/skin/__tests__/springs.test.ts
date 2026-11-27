@@ -15,6 +15,7 @@ import {
 } from '@pixiv/three-vrm';
 import { SpringPhysics } from '../springs';
 import { Skin } from '../skin';
+import { loadSkinModel } from '../skinModel';
 
 type Joint = { stiffness: number; gravityPower: number; dragForce?: number };
 
@@ -116,6 +117,16 @@ async function loadVrm(data: ArrayBuffer): Promise<VRM> {
 }
 
 describe('SpringPhysics', () => {
+  it('removes only spring joints on or below a robot-driven extra bone', async () => {
+    const model = await loadSkinModel(vrmFile({ stiffness: 1, gravityPower: 0 }), {
+      format: 'vrm', bones: { hips: 'pelvis' },
+      extra_bones: [{ node: SKELETON.length + 1, body: 'tail' }],
+    });
+    expect([...model.springBoneManager!.joints].map((joint) => joint.bone.name)).toEqual(['hair0']);
+    expect(model.extraBones[0].node.matrixAutoUpdate).toBe(true);
+    expect([...model.springBoneManager!.joints][0].bone.matrixAutoUpdate).toBe(false);
+    model.dispose();
+  });
   let mujoco: MainModule;
 
   beforeAll(async () => {
