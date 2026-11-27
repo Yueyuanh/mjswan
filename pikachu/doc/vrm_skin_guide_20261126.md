@@ -152,7 +152,8 @@
 
 - 菜单名 **Pikachu V1**，URL `?skin=pikachu_v1`；
 - 骨骼仍走 `PIKACHU_BONES`（hips→base、头→head_yaw、手臂/腿取最深 link）；
-- 构建时把 `pikachu/vrm` 作为额外 `--skin` 目录传入。
+- `python -m pikachu.browser.main` 默认就会挂上它（`--no-skin` 可关闭）；
+  额外加载云端皮套再传 `--skin pikachu/.cache/skins`。
 
 它适合作为后续“皮卡丘皮套适配”的基线：改这个 VRM 的骨骼/权重/贴图，重新构建即可。
 
@@ -328,9 +329,13 @@ scene.add_skin("Avatar", mjswan.SkinConfig(bones=PIKACHU_BONES, source="avatar.v
 
 ```sh
 cd mjswan
+# 默认构建就带仓库内的 Pikachu V1
+uv run --project ../mjlab python -m pikachu.browser.main --build-only
+
+# 再加载云端皮套（实验版）
 uv run --project ../mjlab python -m pikachu.browser.main --build-only \
   --out pikachu/.cache/dist_skin \
-  --skin pikachu/.cache/skins --skin pikachu/vrm
+  --skin pikachu/.cache/skins
 ```
 
 预览：

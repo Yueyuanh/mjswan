@@ -20,6 +20,8 @@ from pikachu.browser import terms  # noqa: F401
 
 HERE = Path(__file__).resolve().parents[1]
 DIST = HERE / "dist"
+#: Skins the repo carries, added to every build unless --no-skin.
+DEFAULT_SKINS = HERE / "vrm"
 MODELS = HERE / "models" / "v0375"
 #: The four actor graphs sync_models copies from the mjlab checkout.
 MODEL_FILES = ("biped.onnx", "crawl.onnx", "transition_down.onnx", "transition_up.onnx")
@@ -53,7 +55,7 @@ def collect_skins(paths: Sequence[Path]) -> list[Path]:
             )
         else:
             found.append(path)
-    return found
+    return list(dict.fromkeys(found))
 
 
 def build(output_dir: Path = DIST, skins: Sequence[Path] = ()):
@@ -158,7 +160,12 @@ def main() -> None:
         type=Path,
         action="append",
         default=None,
-        help="Add VRM humanoid skins (a file, or a directory of them; local experiment).",
+        help="Add skins (a file, or a directory of VRMs/GLBs).",
+    )
+    parser.add_argument(
+        "--no-skin",
+        action="store_true",
+        help="Skip the repo's own skins in pikachu/vrm.",
     )
     args = parser.parse_args()
     out = args.out.resolve()
@@ -169,7 +176,10 @@ def main() -> None:
         app = mjswan.MjswanApp(out)
     else:
         ensure_models()
-        app = build(out, collect_skins(args.skin or []))
+        paths = list(args.skin or [])
+        if not args.no_skin and DEFAULT_SKINS.is_dir():
+            paths.insert(0, DEFAULT_SKINS)
+        app = build(out, collect_skins(paths))
     if not args.build_only:
         app.launch(host=args.host, port=args.port, open_browser=not args.no_open)
 
