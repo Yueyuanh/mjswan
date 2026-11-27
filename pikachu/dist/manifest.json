@@ -90,6 +90,83 @@
             "enable_reflections": true,
             "enable_haze": true
           },
+          "skins": [
+            {
+              "id": "pikachu_v1",
+              "name": "Pikachu V1",
+              "format": "vrm",
+              "path": "assets/pikachu_v1.vrm",
+              "bones": {
+                "hips": "base_link",
+                "spine": "base_link",
+                "chest": "base_link",
+                "neck": "base_link",
+                "head": "head_yaw_link",
+                "leftUpperArm": "left_arm_yaw_link",
+                "leftLowerArm": "left_elbow_link",
+                "leftHand": "left_elbow_link",
+                "leftUpperLeg": "left_hip_yaw_link",
+                "leftLowerLeg": "left_knee_link",
+                "leftFoot": "left_ankle_link",
+                "rightUpperArm": "right_arm_yaw_link",
+                "rightLowerArm": "right_elbow_link",
+                "rightHand": "right_elbow_link",
+                "rightUpperLeg": "right_hip_yaw_link",
+                "rightLowerLeg": "right_knee_link",
+                "rightFoot": "right_ankle_link"
+              },
+              "extra_bones": [
+                {
+                  "node": 50,
+                  "body": "tail_yaw_link"
+                }
+              ],
+              "limbs": [
+                [
+                  "leftUpperLeg",
+                  "leftLowerLeg",
+                  "leftFoot"
+                ],
+                [
+                  "leftUpperArm",
+                  "leftLowerArm",
+                  "leftHand"
+                ],
+                [
+                  "rightUpperLeg",
+                  "rightLowerLeg",
+                  "rightFoot"
+                ],
+                [
+                  "rightUpperArm",
+                  "rightLowerArm",
+                  "rightHand"
+                ]
+              ],
+              "root_height": 0.23655,
+              "height_ratio": 1.0,
+              "hips_offset": [
+                0.0173,
+                0.0,
+                0.0
+              ],
+              "retarget": "rotation"
+            }
+          ],
+          "credits": [
+            {
+              "component": "skin-pikachu_v1",
+              "skin": "pikachu_v1",
+              "vrm": {
+                "name": "1",
+                "authors": [
+                  "1"
+                ],
+                "license": "Other",
+                "other_license_url": "https://hub.vroid.com/license?allowed_to_use_user=everyone&characterization_allowed_user=everyone&corporate_commercial_use=allow&credit=unnecessary&modification=allow&personal_commercial_use=profit&redistribution=allow&sexual_expression=allow&version=1&violent_expression=allow"
+              }
+            }
+          ],
           "mdps": [
             {
               "id": "four_policy_gate",
@@ -359,7 +436,7 @@
                         ]
                       }
                     ],
-                    "func": "mjlab.tasks.velocity.config.pikachu_v035_crawl.mdp:phase_observation"
+                    "func": "mjlab.tasks.velocity.config.pikachu_v0375._baseline.crawl.mdp:phase_observation"
                   },
                   {
                     "name": "GateReference",
@@ -24935,6 +25012,83 @@
             "enable_reflections": true,
             "enable_haze": true
           },
+          "skins": [
+            {
+              "id": "pikachu_v1",
+              "name": "Pikachu V1",
+              "format": "vrm",
+              "path": "assets/pikachu_v1.vrm",
+              "bones": {
+                "hips": "base_link",
+                "spine": "base_link",
+                "chest": "base_link",
+                "neck": "base_link",
+                "head": "head_yaw_link",
+                "leftUpperArm": "left_arm_yaw_link",
+                "leftLowerArm": "left_elbow_link",
+                "leftHand": "left_elbow_link",
+                "leftUpperLeg": "left_hip_yaw_link",
+                "leftLowerLeg": "left_knee_link",
+                "leftFoot": "left_ankle_link",
+                "rightUpperArm": "right_arm_yaw_link",
+                "rightLowerArm": "right_elbow_link",
+                "rightHand": "right_elbow_link",
+                "rightUpperLeg": "right_hip_yaw_link",
+                "rightLowerLeg": "right_knee_link",
+                "rightFoot": "right_ankle_link"
+              },
+              "extra_bones": [
+                {
+                  "node": 50,
+                  "body": "tail_yaw_link"
+                }
+              ],
+              "limbs": [
+                [
+                  "leftUpperLeg",
+                  "leftLowerLeg",
+                  "leftFoot"
+                ],
+                [
+                  "leftUpperArm",
+                  "leftLowerArm",
+                  "leftHand"
+                ],
+                [
+                  "rightUpperLeg",
+                  "rightLowerLeg",
+                  "rightFoot"
+                ],
+                [
+                  "rightUpperArm",
+                  "rightLowerArm",
+                  "rightHand"
+                ]
+              ],
+              "root_height": 0.23655,
+              "height_ratio": 1.0,
+              "hips_offset": [
+                0.0173,
+                0.0,
+                0.0
+              ],
+              "retarget": "rotation"
+            }
+          ],
+          "credits": [
+            {
+              "component": "skin-pikachu_v1",
+              "skin": "pikachu_v1",
+              "vrm": {
+                "name": "1",
+                "authors": [
+                  "1"
+                ],
+                "license": "Other",
+                "other_license_url": "https://hub.vroid.com/license?allowed_to_use_user=everyone&characterization_allowed_user=everyone&corporate_commercial_use=allow&credit=unnecessary&modification=allow&personal_commercial_use=profit&redistribution=allow&sexual_expression=allow&version=1&violent_expression=allow"
+              }
+            }
+          ],
           "mdps": [
             {
               "id": "biped_walking",
@@ -25607,7 +25761,7 @@
                     {
                       "name": "crawl_phase",
                       "size": 2,
-                      "func": "mjlab.tasks.velocity.config.pikachu_v035_crawl.mdp:phase_observation"
+                      "func": "mjlab.tasks.velocity.config.pikachu_v0375._baseline.crawl.mdp:phase_observation"
                     }
                   ],
                   "size": 83
